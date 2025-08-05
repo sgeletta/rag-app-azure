@@ -1,0 +1,179 @@
+Assignment four was pretty long,
+but I would hope that by now, working with other students in the class, you were able to get through most
+of the ones that you were tempted. I'm just going to focus on three of them,
+I think, I'll look at number 6, 10, and 12. Most of the other ones were just
+straightforward through table calculation and I'm pretty sure that by now,
+you should have done those. And if not then do go back and talk with friends and
+other students and try and sort it out. And you may not have had too much
+difficulty with 6, 10 and 12 as well. But let me just play it safe and work
+through these as there's at least one here that's a little bit tricky,
+it's not the first one. Incidentally the first one,
+it's a true statement, this number is a prime number but
+that's not what the question is about. The question is what's the negation or
+the denial and then the simplest way to to say,
+well 34,159 is not a prime number. Or else, you might say 34,159
+is a composite number, either way I think it's
+fairly straight forward. This one is straightforward too but I can't think of any nice way of writing
+the answer that sounds like good English. You would have to say, Roses are not red or violets are not blue,
+which is the kind of sentence that you will only see or hear in
+a class of logic as we are looking at now. Mathematical uses of language,
+precision in language. So it's correct but
+it's just not an elegant sentence, you wouldn't normally say something
+like that, this one is tricky, actually. And it's tricky because there's
+a negation floating around in here. Remember when you got a conditional phi
+yield psi, when you deny it what you get is you get the antecedent conjoined
+with the negation of the consequence. In this case,
+the antecedent is there are hamburgers. Sorry, in this case, the antecedent
+is that there are no hamburgers. There we are,
+I almost slipped into that mistake myself. You've gotta be very careful with this. The antecedent is there are no hamburgers,
+so let's just write that down, there are no hamburgers. Conjoined with the fact that I won't
+have a hot dog and I think in this case it's more natural to write the conjunction
+using but rather than and. And say, but I won't have a hot dog. Okay, so we've got the antecedent that
+there are no hamburgers conjoined, in this case with a but because I think
+it's more natural to say that as a but. But I won't have a hot dog. Okay, well think about that one for a bit. In my experience, students often have
+trouble with this because of that negation, and it throws you off. So, you have to be a little bit careful. Fred will go, but he will not play, again
+the but is really the same as an, and so when we negate that,
+we'll get a, Fred won't go. The and becomes an or,
+we've got or, he'll play. In fact I think in English we've probably
+more likely to write it differently. We're probably more likely to say,
+Fred will play, Or, He won't go. I think we do that because we'd
+read into this some causality, some connection between the two. Now that's going beyond just
+doing the straight negation, but I think that's typically
+how we would understand it. So to me that seems a more
+natural way of saying it. Just a clause with the kind
+of thing people normally do. But in terms of negation, we just took
+the negation of the two parts together with the negation of the but which
+becomes a disjunction, which is a or. So I got, Fred won't go or he'll play. Or more naturally,
+Fred will play or he won't go. This one is actually messy
+if we do it in English but it is much easier to do it symbolically. So, let's do it symbolically first,
+the original statement is that x is negative or x is greater than ten. If we take that statement and negate it, then the x less than 0 becomes
+an x greater than or equal to 0. The or becomes an and,
+x greater than 10 becomes x less than or equal to 10, so that just becomes 0,
+less than or equal to x, less than or equal to 10. If you do it in English, you're
+going to have to say something like. The number x. Is non-negative, you can't say positive because the negation of
+negative is not positive. Because of zero,
+you've got to say a non-negative. The or becomes an and, and the negation
+of greater than ten is not less than ten, it's less than or equal to ten. You have to say less than or equal to 10. And I don't see any way
+of doing it in English, other than with an awkward
+sounding sentence like this. Symbols provide a much more efficient way
+of expressing this idea, and indeed, for dealing with the negation. Okay, but we've found an answer to
+the question, the last one, part (f), we will win the first game or the second. The negation is,
+we'll lose the first game and we'll lose the second game, and
+the simplest way to write that is to say we lose the first two games. Remember the question asked for a denial,
+now that's just not the strict negation, it's a natural,
+well not necessarily natural, but it's an equivalent
+version of the negation. And for some of these we were
+able to find pretty good answers. In others it was kind of messy, but there were a couple of tricky
+ones floating around in there. So I think you need to be a little bit
+careful about these kind of things. Dealing with language precisely
+is actually not easy because our mind jumps ahead. How many of you jumped from
+this one to something like If there are hamburgers,
+I won't have a hotdog. Now students often do that one, gotta be
+careful about the precision of language. Human beings are very smart with
+using language in everyday terms. But the cost is that we drop precision, we think in terms of meanings rather
+than what we think in terms of the way we understanding the meanings
+rather than what the literal meanings are. The whole point of this analysis
+of language that we're doing now, is to be very very precise. And then examples like this,
+remind us that precision is not easy. You have to work at it, okay? Well that was number six and
+what was the next one I was going to do? I was going to do number ten now. So, let's look at number ten. Well for number ten we have to
+refer back to question nine. I'm not going to do this one for
+you, this is just truth tables. By now you should be able to knock
+off truth table arguments easily. And so let me focus on the first one,
+which is b. And we want to show that these
+two things are equivalent. Now equivalence is a two-way street. We have to show that this implies that,
+and that that implies that,
+and so there's two parts. I'll first of all, go left to right,
+I'll show that this implies that. Well this tells us,
+That we can deduce psi and theta, That formula, from phi. But we know that we can deduce, Psi and theta, From psi and theta. Now it's just a conjunction,
+and if we know a conjunction, we know both of the conjuncts, okay? It follows, That we can deduce psi and theta, From phi. We can start with phi and deduce psi and
+theta, that single formula. And from that single formula,
+we can deduce those two formulas. And therefore,
+by chaining those two things together, it follows we can deduce psi and
+theta from phi, okay? That is, we know that we can deduce, Psi from theta, and
+we know that can deduce psi from phi, and we know that we can
+deduce theta from phi. Okay, we can start with phi and
+we can deduce psi. We can start with phi and
+we can deduce theta. So we can go from phi to psi,
+we can go from phi to theta. And if we can do those two,
+Then we have got their conjunct. If that's established,
+and that's established, then it means we've
+established phi yield psi. And phi, here's theta, okay? Well, that was left to right direction,
+what about going from right to left? Assume this guy, and
+deduce that one, okay? Well, let's see what that says. That says, We can deduce, If we can deduce a conjunction,
+we can deduce each conjunct. So we can deduce that, and we can deduce phi use theta. So we can deduce each of those
+two things are possible. Hence, We can deduce psi from theta and from phi, And we can deduce theta, From phi. But if we can deduce psi from phi, and
+we can deduce theta from phi, it means, We can deduce psi and theta from phi. And if we can deduce psi and
+theta from phi, that means we've got phi yields psi and
+theta. Well it's a little bit intricate. First of all, you have to keep
+track of what's been proved. And secondly, you have to remember to
+call phi phi, psi psi, and theta theta. And when you're in the middle
+of the logic as I was, you'll sometimes refer
+to things the wrong way. So if you rewind the tape and
+play it through a few times, made the obvious corrections when I
+meant to say phi and psi, and so forth. And then you should be
+able to unwrap that one. And I'm going to leave c for
+you to try it. So if you haven't got
+this one out already, having seen me get through part b,
+see if you can do part c. Whatever you do, don't take this
+literally and try to just change symbols. Get a handle on the kind of
+reasoning I was using, and then use that reasoning to do this. Throughout this course the worst thing you
+could do is look at any one answer and try to change the symbols and
+change the numbers. That might have got you
+through high school, but it ain't going to get you through much
+university mathematics, believe me. You've gotta go back and
+understand the method. So first of all, understand the reasoning. That already, I think,
+could be a bit of a challenge at first. And then when you've done that,
+have a shot at perhaps c, okay? Let's move on to the next one. Okay, and that next one I want
+to look at is question 12, and that is talking about
+the contrapositive. And these are the four statements that we
+have to write down the contrapositives of. So if two rectangles are congruent,
+they have the same area. So the contrapositive would be,
+If two rectangles, Do not have, The same area, They are not congruent. Number two, the contrapositive
+would be if in a triangle, With sides a, b, c,
+with c being the largest, It is the case that a squared + b
+squared is not equal to c squared, Then the triangle, Is not right angled. So if in a triangle with sides a,
+b, c, c the largest, a + b squared is not equal c squared,
+then the triangle is not right angled. Contrapositive to this one,
+if n, Is not prime, Then 2 to the n- 1 is not prime,
+or if you like, if n is composite then,
+2 to the n-1 is composite. And then, for part d, If the dollar, Does not fall Then the yuan won't rise. Well, actually, writing these
+down was fairly straightforward. It's just a case of looking
+what the contrapositive does. It flips the order of things and
+puts negation in front of them, so actually writing them down was
+not what the challenge was. The point of this exercise was to give you
+an example to sort of help cement the fact that the contrapositive is
+actually logically equivalent. Because, is this one, two, yes,
+congruent rectangles have the same area. If rectangles do not have the same areas,
+they are not congruent. These are both true. If a triangle is right angled, so
+we got this Pythagoras Theorem. If a triangle with a side inside it, each one of these is clear that
+one is equivalent to the other. If this thing happened to be true,
+then other thing would happen to be true. That thing true then that will be true, so I think these four examples
+will illustrate the fact that contrapositives are logically
+equivalent to the original statements. Okay, I said I was just kind of those 6,
+10, and 12, but I was waiting soon this one I thought it will be a good idea to look
+at the Question 14, which is very similar. So, let me do Question 14 as well. Okay, and number 14 is about converses. Where we're going as with a contrapositive
+you flip the order around but in this case you don't inject any negation sign, simply
+the implication in the opposite direction. Okay, which means actually these four are
+going to be very straight forward because we're just going to flip the order. So this one would be, If two triangles, Have the same area,
+Then they are congruent. Now already we've shown by an example now. The converse is not necessarily logically
+equivalent to the original statement. Because the original statement is true. But the converse is false Now this we
+know is the case, let's look at this one. The converse of this one is the following. If, in a triangle, with sides a, b, and c, with c the largest. It's the case that a squared
+plus b squared equals c squared. Then the triangle, Is right angled. Now this is true. It's Pythagoras' theorem. And the converse of
+Pythagoras' theorem is true. So these are both true. But what's going on is that we've actually
+started out with something that's not just an implication when it
+actually is an equivalent. Then when you've got an equivalence,
+and you take the converse, you've just got another part of it. The statement and the converse are both
+the two halves of an equivalence, so you can get the same truth values, but only
+when there's an equivalence already there. In the case of this one,
+The converse would be, if n is prime, And 2 to the n-1 is prime. And the converse of this one is,
+If the dollar falls, The yuan will rise. And in this case there's no reason to
+assume that one necessarily follows from the other, unless in some way
+the other two currencies are linked. Okay? Well. I hope you manage to get the four
+converters written down correctly. But as I indicated a moment ago that
+wasn't really the point of this. The point was to sort of give
+us examples of the fact that converses don't necessarily
+yield equivalent statements. When you take a converse you now
+get something that equivalent. Whereas with the contrapositive that
+we looked at in the previous example, in example 12. When you take the contrapositive you
+do get something that's equivalent. Okie dokie. Well, that should I think
+take care of assignment #4.

@@ -1,0 +1,198 @@
+Well for assignment 6 I'm just going to do
+the last 3 questions, number 7, 8 and 9. I think you should be able to do the first
+6 on your own and check it on your own or with other students.
+So in number 7 we have to negate statements and put them in positive form.
+Part A was for all x in N, there was a y in N X plus Y equals 1.
+The negation for that is, and I think you'll get the same answer as I do, if you
+get it right. There is an X and N, such that for all Y
+and N, X plus Y is not equal to 1. You, you could have written that last part
+as not X plus Y equals one if you like, that's equally correct, I just choose this
+way of writing it. Okay, and in this one, for "X" that's
+greater than zero, there's a "Y" that's less than zero, "x" plus "y" equals zero,
+the negation of that, in positive form, is an "X" greater than zero and it's greater
+than zero, okay. For all "Y" less than zero, these don't
+change around. They stay the same way, because these
+simply tell us what Xs and Ys we're looking at.
+And, we get X plus Y not equal to 0 here. Okay, for part C, there is an X, greater,
+there is an X, so epsilon greater than 0, negative epsilon less than X, less than
+epsilon. And when you negate that you get for all x
+epsilon greater than 0. But in this case you going to have to sort
+of split this into 2. One of 2 effects is not between negative
+epsilon and plus epsilon then either x is less than or equal to negative epsilon or
+x is greater or equal to epsilon I didn't put parenthesis around either of
+these,[UNKNOWN] I could have done if I wanted to be ultra clear but this takes
+precedents over the logical operations, arithmetic's expressions are, inequalities
+and so forth. Take precedents over logical connectors.
+Because these are connectors. They connect Statements about mathematics.
+And this is a statement about mathematics, and that's a statement about mathematics.
+But if you wanted, you could have put parentheses around that.
+And you could have put parentheses around that.
+That would been, that would have been another way of doing it.
+Moving onto the last part. For all x and n, for all y and n, there a
+z and n . X plus Y equals z squared, we're not
+talking about whether these or true or not, we're just writing them down and
+negating them, so you got exists an X and N, exists a Y and N, for all Z and N, and
+I've just written this again, X plus Y is not equal to Z squared, you could simply
+put a negation sign in front of that expression.
+Okay, well that's number seven. It';s fairly straightforward, let's move
+on to number eight. Question eight is our old friend Abraham
+Lincoln, and this famous statement of it, or allegedly famous statement of his, and
+when it's negated[INAUDIBLE] that famous sentence.
+So, let's let fxt mean you can fool person p at time t.
+And then his statement is this one. You can fool all of the people some of the
+time. There were some times when you could fool
+everybody. You can fool some of the people all of the
+time. So, there are some people that can be
+fooled for all ti-, at all times, but you cannot fool all of the people all of the
+time. Okay, let's just mechanically go through
+and negate that. Looking at the formulas then, and then
+we'll try to interpret, the answer and express the answer in terms of English.
+Okay. So, negate exists, it becomes for all when
+it for all, it becomes exists, FPT becomes not FPT.
+Okay, conjunction becomes a disjunction. Again, I'm not putting these in
+parantheses. And I'm not going to do it here because
+this is a, this is a, is a whole that quantifies binding the, the very tight
+binding. And then we have this junction conjunction
+here and then this junction's here the, their less tightly binding.
+So looking at this one, exist becomes for all, for all becomes exist we get
+negation. Conjunction becomes disjunction and the
+negation here just disappears. So I put a positive statement.
+Okay so in terms of the formalism, this is fairly routine.
+In fact, this is such a routine thing that this is essentially algorithmic.
+I just went through and applied, the, the patterns, the rules that I've observed
+happening. The interesting part of this, I think, and
+you wont have to do it, but let's do this. Let's see how we can express this, in
+English language. And, We're not going to get something
+quite as, as nice as this, I don't think. Because we need to try and be, to avoid
+ambiguity as much as possible. So the first part would be the best I can
+think of at the moment is, let's see. At anytime, there is someone you can't
+fool, and, oops or, because we've negated, or okay.
+Let's have a look at this one. I can't really think of anything better
+than to say the following: for every person, you can't always fool them.
+Well, no. I think if you try and swap it 'round.
+You run into sort of a American melanoma type problem.
+So, to try and avoid that, I think I would, I would want to write it this way.
+And then, the final clause. But that's easy, of course, let's just
+say, you can fool all the people all the time.
+Ok. I'm, I'm moderately happy with that, you
+might say I have different opinions on the best way to write that.
+[inaudible], But, number 2 is a bit ugly. But I was, I'm not sure we can make a
+better job of that one. Okay, in any case, we've, we've, we've,
+we've negated the thing. And, and this was nice and clean.
+Okay, now, now, let's look, look at number 9.
+Well, number 9 involves one of the most, important and most famous, some might say
+infamous formulas. Of, advanced mathematics.
+Of university level mathematics. It's this definition.
+When students entering math-, entering university to study mathematics.
+Therefore, a math major. It's this definition that, that usually
+causes them the most problems during their first year.
+In fact I think it's this definition that probably is responsible for more math
+majors giving up uh,mathematics in their first year at university more than
+anything else. It's a really tricky thing to understand
+as many of you've noticed, and I've seen from discussions on the forum.
+Figuring this out is, is really hard. This was hundreds of years of effort
+starting with the invention of the calculus by Newton and Leibniz in the, in
+the 17th century. It took a long time in several hundred
+years before mathematicians were able to figure out the notion of continuity and
+come up with this definition. This was late-19th century that this was
+done. And it was it was a tricky thing.
+Negating it is relatively straight forward, actually, because we've, we've
+got rules for doing them. And so, when you negate it, what you get
+is that the for all becomes exists and the, it's still a greater than, we're
+still talking about positive numbers, epsilon.
+The exists becomes a for all, the for all becomes an exists and, then there's a
+bunch of stuff that's in the bracket here. This is a conditional, an implication, and
+so, when you negate it, you get the antecedent conjoined with the negation of
+the consequent. So, here's the antecedent.
+Again, I haven't put parentheses around that because this is a, a mathematical
+statement, and That, that's take precedence over the, over the conjuncts
+not just junction is I've just connected there operators that bring things
+together. So that's a piece on its own.
+That guy, conjoined with the negation of this guy.
+Okay, the negation of it will be less than F1.
+If it's originally F1. Okay, so, so that's the negation and
+that's relatively mechanical to do that, as long as you sort of pay attention to
+Preserving things that need to be preserved.
+Changing for alls to exist and negating a conditional.
+The interesting question is, what on earth does this mean?
+You know you can read it through as I just did for all epsilon, greater than 0, this
+is delta greater than 0, such that for all x, yada, yada, yada.
+What does it, what does it mean? Well, this is capturing in sym-, in, in,
+in a symbolic language. In an aglebraic form-, formalism.
+It's capturing something geometric. So, let's see what it's capturing.
+Let's look at the original definition of continuity.
+It's about functions. So let's look at a function this way.
+I'll draw a wavy line vertically, this is a real line, and then I'm going to draw
+the real line vertically here. So this is the real line, instead of
+writing horizontally as we usually do, I'm going to write it horizontally.
+And the function, f, is going to take Numbers here, to numbers here.
+Okay, so somewhere here we've got A. F applies to that.
+And it gives me F of A. Okay.
+Now we're trying to capture the notion of continuity at a.
+That means when we go slightly to the left or right of a, left or right is up and
+down the way I represent it, then the numbers don't sort of have a
+discontinuity. And the way to caption that it turns out
+and chances are very, very high that you're not going to follow this the first
+time, it's going to take you weeks if you need to, to master this.
+But here's what this formula says, it says the epsilons are going to work on here, it
+says let's take an epsilon here and let's look at F of a plus epsilon and f of a
+minus epsilon. So I'm going to take an epsilon interval
+around f of a. And what this definition says, is that,
+given an epsilon in 1 of these intervals, I can find a delta.
+So here's a plus delta, and a minus delta. So starting with an epsilon, which gives
+me an interval here, through any one of those, I can find a delta, which gives me
+an interval here. Search that.
+Now let's look at this. Any x, in this region, because this says,
+that x is within delta of a. So any x in this interval, gets sent to an
+image f of x, in here. So it's saying, in order to make sure that
+all the values of the function Are in this interval.
+I can find an interval around A, such that they're all sent into here.
+So, if I want to hit the target, imagine this is hitting the target, like throwing
+darts at a dart board. If I want to hit the target within a
+specified accuracy of a, of f of a, I can always do it by starting out within an
+interval of a. So to get within a given interval around f
+of a, I can always find an interval around a that does it.
+So everything from here gets sent into here.
+And if you think about it long enough, you'll realize that what that means is
+that the function is continuous at here, there's no, no, no jumps.
+And to try and understand that, let's look at what this guy means in terms of a
+diagram. I'll do the same thing again, I'll draw
+the rail line. And I'll draw the real line.
+And here's a, and here's f of a. Now the negation says there is some
+epsilon. In, in the previous case this was
+happening for all epsilons. You could find a delta.
+In this case there's a fixed epsilon that we can find.
+And we look at the interval around there, F of A minus Epsilon, okay, what it says,
+is that there is an Epsilon, such that, no matter what you take here, no matter which
+one you take here, here we found one of these guys, we said Take any interval
+here, we could find and interval here. Here we're saying the reason interval here
+for some epsilon such as no matter what delta we take here, no matter how small
+you make this delta, no matter how close you get here, that was a point that gets
+sent to that, you can always find a point in here, that gets sent outside of there.
+Maybe sent that way, maybe sent that way. So the sum epsilon here, that no matter
+what you do in here, no matter how close you are to a, something gets sent out
+here. In other words, there are points really,
+really, really close to a that get sent outside this region.
+So there's no way that you can, you can get all points in here.
+A gets sent to that, but arbitrarily close to a There are points that get sent away.
+So there's discontinuity, because only a gets sent close to a.
+When you get, well some other points maybe, but no matter how close you get to
+a, you'll find points that are sent further away.
+So that's a discontinuity. Thing's jump, there's a sort of jump form
+there from there to thing here or here. Now I, the chances are high, if it's the
+first time you've seen this, that explanation is going to be hard to follow.
+This is really difficult to understand. This is extremely, extremely hard.
+And, and the goal of this course actually isn't for you to understand this, the goal
+of this course is to give you the machinery so that you're now able to take
+a whole semester course on real analysis that you're enduring, which you should be
+able to understand that. So, I wouldn't worry too much if you can't
+understand this. The point is if you could understand the
+first part and understand how to deal with the formalism you now have the machinery
+you need to understand this is very deep conceptual definition from within
+mathematics. Okay, and so to have reached such stage in
+4 weeks I think is pretty, is pretty remarkable.
+The hard part is to come. And for those of you that want to go on
+and study more mathematics sooner or later and hopefully sooner you're going to need
+to master this definition and what it means.
+Okey dokey? Well as far as we're concerned we're done
+with this one.

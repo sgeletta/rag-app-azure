@@ -1,0 +1,613 @@
+Here were my answers to assignment five, 
+starting with question one. The equation x cubed equals 27 has a 
+natural number solution. I got there is an x in the natural 
+numbers such that x cubed equals 27. For part b, a million is not the largest 
+natural number What I said was there is an x in n, there is a natural number x 
+which is bigger than a million. Part c, the natural number n is not 
+prime, there is a natural number p and there's a natural number q So it's that p 
+is bigger than one, and q is bigger than one, and n equals pq. 
+So there are natural numbers pq, both of them bigger than one, such that n is the 
+product of p and q. Notice that conjunction splits things in 
+this way. There's a natural order of precedence for 
+the various relationships. First of all, a relationship like equals, 
+greater than, less than comes in, then you conjoin things and disjoin them and 
+do various other things. And then next in line of precedence is 
+actually conditional and biconditional, and you read these formulas left to 
+right. There's a p in q, there's a q there's 
+there's a p in n, there's a q in n, so it's that p bigger than one and q bigger 
+than one and n equals pq, so you read it left right. 
+This is why we made a big deal about that the American Melanoma Foundation. 
+Because in mathematics, you really have to read things left to right, and the 
+left to right ordering dictates the logic. 
+Okay? Well, let's go on to question 2 now. 
+Express the following goes for all the sessions using symbols and words. 
+Okay. So the equation x q equals 28 does not 
+have a natural number solution. Or the most obvious way of expressing it 
+using quantifier in, in, simple formulate way. 
+It's to say it is not the case that there is a natural number x which satisfies the 
+equation. Whereas to give in terms for all 
+assertions so this basically means putting this in, in the sort of canonical 
+form or positive form. And to say it's not the case of existing 
+x in N. Is to say for all x in n, it's not the 
+case that x cubed equals 28, which I'll write in the familiar fashion x cubed is 
+not equal to 28, okay? I've could of written it. 
+I've could of written the last part as being not the case at x cube equals 28. 
+Okay I could have done it that way. They're both fine. 
+Okay. So now we've specified that there's no no 
+natural number solution. another way of saying it is every natural 
+number fails to be a solution. Okay, number, part b, zero is less than 
+every natural number. Let me just stress that the natural 
+numbers do not include 0, they begin 1, 2, 3, et cetera. 
+Historically zero was an unnatural number, in fact originally zero wasn't a 
+number it was just a, a zero symbol was a circle that denoted there was nothing 
+there, and you needed to denote that there was nothing there when you had 
+place value arithmetic. So this came much later Roma Gupta in 
+India 600 and something[UNKNOWN] was the one who sort of came up with that. 
+okay, I mean she was the one who wrote about it and is today credited to have 
+been to one that really sort of nailed it. 
+Okay, so zero is less than every natural number so this is actually true. 
+This is a true statement and here's a way to capture it for all natural numbers x. 
+Zero is less than x. I could of written this as x greater than 
+zero. Alright which ever way I write it doesn't 
+matter. but I've written it. 
+Since its expressed in terms of less than I can use the formula for less than but I 
+mean that still says the same thing. okay, so I think there's anything more to 
+say about that. the natural number n is prime. 
+This is really the negation of the previous one of part c of question one 
+where we looked at the formula that captures the natural number n is not 
+prime. And so we're essentially going to negate 
+that. you can go back to the previous one and 
+put a negation sign in the front and then let the, let the negation ripple through 
+as you sort of work your way in which towards a positive statement. 
+But let's just sort of jump straight in and, and say it directly. 
+To say that the natural number n is, is a prime in terms of universal quantifiers. 
+What you are going to say is if all possible numbers that would divide into 
+it, they can't on necessary equal to one of the number itself okay, so here's a 
+way of saying it whenever you try to factor it so for all possible factors 
+into two. If you have a factor, if you have a 
+factorization then one of the numbers is wrong, and the other one is N. 
+So for all possible ways of factoring the number N, necessarily one of the factors 
+is equal to one, for all Possible factors, one of them has to be equal to 
+1. Okay, that's it. 
+So, those are the three answers that I got for number 2. 
+Question three, everybody loves somebody. here's how I interpreted that. 
+For all people x, for all persons x, there is a person y. 
+So it's just x loves y. For every person, there is a person they 
+love. The person they love, will depend on the 
+person you start with. The y will be different perhaps, from one 
+x to the next x. Give me an x I'll find a y. 
+Give me a pairs in x. I can find a pairs in y. 
+So should x loves y. Different people again not a medical 
+melanoma foundation example. Which of course its not a problem in real 
+life because everybody interprets the right way. 
+In fact some of the people in the forum. In the forum discussion there was, there 
+was quite a few people. Who said they couldn't see the problem 
+with the the little statement. Okay this is why we're making a big deal 
+of this because to get to the point where you can understand how the ordering of 
+quantifiers can be important, you have to be able to see what was going on with 
+that kind of example. Okay, let's move on to part b. 
+Everyone is tall or short. What that says is for every person x, 
+either x is tall or x is short. Everybody is one or the other. 
+actually this, the way this works this is the inclusive or, but of course, the, the 
+properties themselves will, will, will make this a disjoint, this disjoint on. 
+You, you want to have someone that is both tall and short although in real life 
+tall and short will have an overlap you know there comes a point where is someone 
+taller? Is someone short? 
+So the interpreting theses is is really a matter of interpretation I mean the 
+height, this is a fairly clear answer. But when you try to map the ambiguous 
+fuzzy real world into the precision of mathematics there's some trade offs. 
+That's the whole point. The point is things like this are very 
+ambiguous when this tall turns into short. 
+By writing something like this, we've changed, we've taken something that's 
+ambiguous and fuzzy and we've forced it to be precise. 
+And that's the whole point of what we're trying to do. 
+To get precision. To get rid of the ambiguity and the 
+fuzziness. Doesn't mean to say that's gone from the 
+real world, but it's gone from our interpretation of the real world. 
+So this is an interpretation within mathematics if you like. 
+With it's precision of something in the real world, which is not precise. 
+Okay, part c. Everyone is tall or everyone is short, 
+that actually comes out a different way. That says every person x is tall, that's 
+one part. And the second part, everybody x is 
+short. And here we've got another of these 
+precedence rules for logic in that universal and quantifiers or the same as 
+two existential quantifier we'll see. These are very tight, they, they bind 
+whatever comes in the the, comes next. Which means you have to use parentheses 
+if you want to use a quantifier that binds everything like we did here. 
+So to make this bind these two. By the way, I'm talking about things like 
+for all x binds, the thing that comes next, the thing that's in the 
+parentheses. We use the word binds for quantifies. 
+That means it governs that. It, it's, it, it restricts the xs in 
+there. And the, this, the, the formal 
+terminology of that is binds. And so, in, in the binding rules 
+quantifies bind everything that comes next to them, and if you want them to 
+bind a disjunction, you have to put them in parentheses. 
+So that has to become a unit to be bound by through all, same would be true for 
+exists. In this case, you don't need the 
+parentheses because all you've got is one predicate here tall x, so you've got here 
+for all x tall x or for all x short x you might ask yourselves do you need there 
+parentheses here, and the answer to you in no, I've put them in to be clear. 
+the, generally the rule for parentheses is you put parentheses in when you need 
+them to disambiguate, but because this is the first time we're running through 
+these, I mean x with parentheses. the goal in all cases is avoid, avoid 
+ambiguity, and if you if you haven't got something ambiguous, you don't need the 
+parentheses. Alright? 
+So notice that these are different, though. 
+this is talking about add everybody is tall or everybody is short. 
+This is highly unlikely to be to be true. Except in a very strange sort of a 
+society. this one is certainly true if we're 
+prepared to say whether where the tall and short changes at sort of, I don't 
+know five feet or whatever you want to do, okay? 
+Okay, let's move on. That's enough for that one. 
+Well for nobody at home I took it as a, as a, as a sort of a universal 
+quantification, if you like. I took, I read this as for every person 
+x, x is not at home. you might have gone a different way, you 
+might have said, it's not the case that division x choose at home x, okay? 
+That would be fine. you may think that, you might think that 
+this is actually a closer rendering of this one. 
+it depends whether you regard that as some kind of universal quantifier or not. 
+you know, so I'm interpreting that as saying something about a sort of, a 
+negative universal quantifier almost. I'm saying that this for all x, it's not 
+the case the x at all. But you could equally well argue, I 
+think, to say that that the most natural one is to say there is no person who's at 
+home. Okay? 
+in an, in natural language is that a sort of a universal quantification, or is this 
+an existent, a sort of a negation of an existential quantification? 
+depends how you interpret it, but both of them are correct. 
+These are equivalent. As we've seen, these are equivalent 
+assertions so it's just a matter of choice as to which we think more 
+accurately reflects the nuances of of English language. 
+Alrighty, part e. If John comes, all the women will leave. 
+If John comes then, so this is I think very clearly an if statement, and then 
+there's a conclusion, so this is the antecedent, and then we've got a 
+consequence. So John comes, then it's the case that 
+all the women will leave. For any x, and our variable x, it ranges 
+over people So I have to say for every x. If x is a woman then x leaves. 
+So that's our way of saying all women leave. 
+For all x if x is and I've put brackets here. 
+Because I want to make sure that the universal quantifier applies to this. 
+It's the same x, that if x is a woman, then x leaves. 
+All right. Number f, part f, if a man comes, all the 
+woman, all the women will leave. In this case, it's not a single person 
+John, it's any old man, so we'll have to say, if there is an x, so here's the if 
+part. If there is an x, who is a man, and who 
+comes, then we got the consequence that every women leaves. 
+This is the same as the previous thing. So, this still says every woman leaves, 
+but instead of saying John comes, I’m saying there is an x who is a man and who 
+comes. Well, notice that number 4 isn’t about 
+whether these things are true or false. It’s simply about expressing them in, in 
+a formal fashion. in this case, using the quantifiers that 
+range over the set of reels and the natural numbers. 
+This actually is a very common situation when you're looking at real analysis, the 
+theory behind the Calculus. You have quantifiers that range over the 
+real numbers. and either the natural numbers or the 
+integers. the positive and negative numbers. 
+The whole numbers. so it's, but it's very common to have 
+this kind of scenario. Okay the equation x squared plus a equals 
+0 has a real root for any number a, for any real number a. 
+So here's how I, how I wrote it. For all real numbers a there's a real 
+number x which satisfies the equation. Notice that here the quantifier Over a 
+comes first, here it came at the end of the sentence now this is because this is 
+a very natural way of writing it in English. 
+When we said we have to be careful we don't make that[INAUDIBLE] foundation 
+mistake of getting quantifiers in wrong order. 
+In English, it's fine, because we, we know how to read these things. 
+In mathematics, it's crucial, absolutely crucial, that the first thing that comes 
+here is that for all a. If the, if this guy comes first it's 
+going to be wrong. It's not going to capture it. 
+So, when we take a sentence in English, even when, if the quantifier comes at the 
+end and here the quantifier. For any real number a, this is a 
+universal quantifier. Even though that comes at the end of the 
+sentence, which is fine in English, wasn't fine for the American Melanoma 
+Found, actually it was because everyone reads that Melanoma example correctly, 
+but it it, it causes it causes mathematicans some amusement every time. 
+But in this case, the order is absolutely crucial And here's why. 
+Because the x that we get depends on the a. 
+Okay? In fact, for some a's, you're not 
+going to get an x as we know. I mean, this is only true if a is 
+negative. And we'll look at that case in a minute. 
+So this isn't even true for all a's. But even if you take the negative a's, 
+the x that solves it depends on the a. So you have to have an a before you can 
+find the x. One way of reading this is to say, if you 
+give me any a, I will find an x that solves the equation. 
+You give me an a, I'll find an x, depending on the a, that solves the 
+equation. Alrighty? 
+Quantify order is crucial in this kind of expression. 
+part b actually brings it to the previous one, but except we're really talking 
+about for any negative real number, and this is actually going to be true. 
+So there's a quantifier for any real For any negative real number and we're 
+going to capture that as follows, we're going to say because we don't have a set 
+of negative real numbers, we've got the set of real numbers so we have to say for 
+all real numbers a, if it's the case that a is negative then, so there's an if 
+there. And here's a then. 
+Then it follows that there is an x that satisfies the equation. 
+So let me read that once more, one more time. 
+For any real number a, if it happens that a is negative, then there is an x which 
+solves the equation. Or, in terms of you giving me a number, 
+and me finding an answer, if you give me an a Then providing the a that you give 
+me as negative I can find an x such as pass the equation but again notice what's 
+here the x depends on the a. You give me a different a few minutes 
+later I can still find an x providing the a as negative. 
+But it'll be a different x. This is why the order is important, the a 
+has to come first, because the x depends on the a. 
+Now that's actually to here as well, but English allows you to say them in the 
+opposite order and still mean the same thing, that's because English is a rich, 
+natural language. Mathematics is a precise formal language, 
+which exists kind of formulaic mathematics. 
+This is very precise and formal and it has to be for doing particular things in 
+mathematics. I mean, most mathematicians most of the 
+time don't write things formally this way. 
+They use English. They write things like this. 
+This kind of expression is important in certain crucial stages of mathematics. 
+It' not that mathematicians argue using precise language all the time, they 
+don't. They aren't using everyday language, but 
+when it counts, they pull this kind of a thing out because it's crucial the last 
+topic. And in fact, the very last week of the, 
+of the lectures, we gave, when we look at the last the last topic. 
+We're going to make some very, some historically, and actually contemporary 
+important we're going to look at something very crucial to mathematics 
+which developed in the late 19th, early 20th century, middle 19th century. 
+Where it was actually crucial in order to advance in mathematics to make one or two 
+key definitions with this kind of decision. 
+Okay. Now issue of convergence, the sequences 
+and the continuity of functions. Okay, part c, every real number is 
+rational, so, every real number x. What are we trying to say? 
+We're trying to say, for every, this is got it's false, right? 
+That's this again another example, I've been looking at. 
+This isn't about whether things are true or false. 
+I mean this one is false. This one I like it's true. 
+This one is false. let me just mention these things, this 
+one is at false. This one's true, this one's false. 
+Literally, this isn't what we're asked to do, we're just, we're just looking at 
+expressing things. The point is, you can express things in 
+mathematics precisely whether they're true or false. 
+And sometimes you have to express them formally in order to determine whether 
+they're true or false. But it's a separate issue. 
+True or falsisy, truth or falsity is a sepaprate issue from whether you can 
+express it formally. Okay. 
+Every real number is rational. That really says that you look at any 
+real number x, so this is the every real number part. 
+What you want to say is that real number x can be expressed as a quotient of two 
+integers. So you would probably say m over n equals 
+x. Or, well, these are positive numbers. 
+The x could be negative. So, we've got to allow for the fact, 
+minus m over n equals x. So, that's to say m over n equals x, or 
+Minus m over n equals x or the x could even be 0. 
+Okay, so you could have 0 equals x if we're putting the x second. 
+So 3 possibilities, it's equal to the ratio of 2 natural numbers, or minus the 
+ratio of 2 natural numbers or it's equal to 0. 
+Okay? Oh, incidentally, I wrote it this way 
+just because it's sort of neater. I mean, the aesthetic the, I've been in 
+mathematics a long time, and you develop an aesthetic sense. 
+And the sense I developed was it, it's cleaner to just write it this way in part 
+because, when we're talking about natural numbers, in the natural numbers you have 
+two operations essentially. You've got plus and you've got times. 
+You don't have negation and you, not always, I mean you can sometimes subtract 
+but one number has to be bigger than the other. 
+And you don't always have division. You have a property of divisibility but 
+you don't have division. So, when you're dealing with just natural 
+numbers all you can do is add them or multiply them. 
+Now here we've got real numbers flow, thrown in as well. 
+So there's nothing wrong with writing it this way, but because m and n typically 
+when they're on their own don't involve division I just thought it was sort of 
+nice and elegant, to avoid writing m over n. 
+Okay, because this actually take you out of the, of the integers out of the 
+natural numbers. Then I mean this is, this is just a, this 
+is just a setting. This is not question of right or wrong 
+its just a matter of a settings. If you do it in this way that's 
+absolutely fine, okay. There was[INAUDIBLE] notice that the m 
+and the N exist, depend on the x. You give me an x, I will find an m and an 
+n which satisfy that. Or at least I would if that happened to 
+be true. It's not so I can't always find them. 
+But the order of the quantifiers is crucial here as well. 
+If you get the order sum in the m and the n it doesn't matter with those two. 
+This is symmetrical. But if that guy comes in here somewhere 
+then it's not going to capture it. Okay, well part d is just a, sort of like 
+a negation of part c if you'd like. Okay, and here's how I wrote it. 
+There is an irrational number, so there is a number with the following property. 
+That for all pairs of natural numbers m and n, m divided by n is not equal to x 
+and negative m divides n is not equal to x. 
+Okay as before I have to look up both possibilities, to allow for negative 
+numbers. Previously we had this junction here 
+because we were talking about a positive thing. 
+And I really just negated what came before. 
+Notice that I'm not putting brackets around this whole thing because I don't 
+need them. Because when you read left to right. 
+There's only one way to read this because of, of the, of, of the parenthesis I've 
+got in. There is an x in R. 
+This is going to be the irrational number we're asserting to exist. 
+With the property that for all m in N and for all n in N, Now I've got brackets in 
+because this part Has to be bought together. 
+M is not equal to nx nor is m equal to negative nx. 
+M divided by n is not equal to x, nor is minus m divided by n, equal to x, okay? 
+So I suggest you compare this one with part c that we just did to see how I've, 
+I've just taken my answer to part c, taken my negation, and made it an 
+existing statement. Part e well I mentioned when I formulated 
+the question that this one looks quite complicated, it does. 
+I wish you could do, you do either one R here. 
+There are two ways of I, I entered these two ways one of said well hm, what I 
+could say is it, for all real numbers R, for all real numbers y. 
+There's a real number that's bigger than y, which is not rational. 
+So, given a real number, I can find a bigger real number. 
+So, given a real number You can find a bigger real number which is not equal to 
+the quotient of two integers m and n. Notice that I didn't bother with the, the 
+negative part here, because I'm going bigger and bigger. 
+And if you're trying to say that there's no allowed irrational number you're 
+really going, you, you're in the positive range. 
+You, you're going up into the positive range. 
+So what happens in the, to the left of zero, on the, on the real line is 
+irrelevant. So, I don't need the negative part 
+because I'm talking about there being no largest one. 
+But I'm saying that for given, given any real number There's a number bigger than 
+that. Which is not the quotient of two 
+integers. And again because I'm now restricting 
+myself to a natural numbers. I think its cleaner to write it in this 
+way. But you don't have to because we have 
+globally we're talking about real numbers. 
+In which means that we could in fact here. 
+Just write m over n not equal to x that would be fine. 
+It was fine before I'm just trying to draw the, draw attention to the point 
+that the natural numbers themselves only have addition and multiplication, but we 
+are after all talking about real numbers, so, so there's no problem writing it this 
+way. wasn't a problem in the previous 
+questions either. Okay. 
+You could, however, say that this is really a statement about just the 
+irrational numbers. Given any irrational number, there's an 
+even bigger irrational number. Then it gets extremely complicated 
+because you have to say, given any real number r If that number is irrational 
+then, there's an even bigger number that's irrational. 
+So the difference is, in this one, I've simply said given any real number, 
+there's a bigger number that's irrational In the second I have said given any 
+irrational number there is a bigger number that's irrational now arguably the 
+second one is a much closer interpretation of what this means because 
+you could say what this is really seen is. 
+It’s making a statement about irrationals. 
+So, you’re really only going to mention irrationals. 
+And that’s the second version. Given any irrational there’s a big 
+irrational. So, this is a closer that’s a closer 
+answer. The first one is equivalent to it, 
+because c rationals and e rationals make up the bills, there is sort of in just 
+best and if you can find any irrational bigger than any real number, then you can 
+find an irrational bigger than any irrational number, that's a. 
+Either are correct. It's just a matter of, of how we 
+interpret them, and exactly how much of this statement you are capturing in the 
+formalism. Once you've got something formal, it's, 
+it's, it's not ambiguous, so long as you expressed it correctly with the 
+parenthesis and so forth, it' not ambiguous. 
+It's absolutely precise This thing has exactly one interpretation. 
+This thing has exactly one interpretation. 
+That's the whole point. This has several interpretations. 
+I mean, here are two different ones. They're equivalent. 
+They're obviously equivalent, for very obvious reasons. 
+But we've cashed them out in different ways. 
+Well question five is our old friend about domestic cars and fallen cars so C 
+is a set of all cars, Dx means x is domestic, Mx means x is badly made. 
+All domestic cars are badly made for all cars. 
+If that car is domestic, then it's badly made. 
+For all cars, if the car is domestic, then it's badly made. 
+I think that's a fairly straightforward one. 
+I I wouldn't expect you to come up with anything significantly different from 
+that. In fact I wouldn't expect you to come up 
+with anything different from that at all. But you might of done. 
+Okay. All foreign cars are badly made but we 
+don't have a predicate for foreign so we have to take foreign as meaning not 
+domestic. In which case we take the previous one. 
+And we just replace the Dx by negative Dx and so, but not Dx, so for all x and C 
+the effects is not domestic then it's badly made. 
+And here I'm making use of the fact that negation is a very tight binding, has a 
+very tight binding negation like quantifies applies to whatever comes 
+next. So if you want to negate a whole bunch of 
+things. You have to sort of join them together 
+and put parenthesis around in order to make sure that the negation applies to 
+the whole thing. So negation applies to whatever comes 
+next. And so if you wanted to apply to a bunch 
+of things you have to put them in parenthesis so just as arithmetic in 
+algebra you have to use parenthesis to disambiguate and the rules actually 
+follow pretty close to the rules in arithmetic in algebra and so once you 
+realise how negation, conjunction, disjunction. 
+A conditional by conditional. Once you realize how they correspond to 
+to formulas and to the symbols of mathematics. 
+Or to the symbols of algebra and arithmetic. 
+Then you you should be able to follow these kinds of formulation. 
+Okay. It just takes a little bit of getting 
+used to. Just in arithmetic and algebra. 
+Part C. All badly made cars are domestic. 
+For all cars, if the car is badly made, then it's domestic. 
+And I think that one's straightforward. There is a domestic car that is not badly 
+made. There is an x which is a car, which is 
+domestic and is not badly made. Notice by the way that when we are 
+capturing universal quantifiers, the statements that involve if-then, then we 
+have A conditional, an implication. For all x, if the k-, if it's, well for 
+all x that are in the cars, for all cars, if the car is badly made, then it's 
+domestic. In the case of an existential quantifier, 
+if there is a car, we're saying there is a car which is domestic and not badly 
+made. So, when we have universal quantifier, we 
+typically will compare it with a conditional, with an implication. 
+When we have a x as existential quantify, we will typically compare or compare it 
+with a conjunction in case so. To all go with an implication, exist go 
+with a conjunction. At least in these kinds of cases. 
+the,the we, the trick, it's not a trick. The rule we have to remember is to try 
+and understand what these things say. so it's never a good idea to look for 
+symbolic rules that can lead you astray if, if the formulation is a little bit 
+different. There is a foreign car that's badly made. 
+There is an x in set of cars. Which is foreign namely nondomestic and 
+it's badly made. And because negation binds tightly, I 
+didn't bother putting parenthesis around this. 
+If I had wanted to say not Dx and m of x I would have put parenthesis around there 
+but the negation just combines what comes next to it. 
+And what comes next to it, it's not domestic okay, it's foreign. 
+All right? Well that takes care of the foreign cars, 
+let's move on to question six. Well question six is about the same kind 
+of things that we've already been looking at in some of the earlier ones, namely 
+whether things are rational whether they're ordered in set and where, whether 
+they're a biggest rationals or whatever, but we've got a different set of 
+restrictions. Here we're asked to, to simply use 
+quantifiers for real numbers logical connectives, the order relation, but we 
+do have a symbol q of x, meaning x is rational. 
+So we're going to get a different expression. 
+So the focus in what we're trying to make precise has been, has been put elsewhere. 
+Okay, we're allowed to assume what it is to be rational that's not part of what 
+we're trying to explicate. So in this case we don't have to talk 
+about things being in reals on it or whatever because that's all we've got. 
+So I don't have to say for all x and all y I can say for all x and y. 
+And I've, I've, left of parenthesis, because there's no ambiguity, that just 
+means for all x, for all[INAUDIBLE] whatever comes next to it, so for all x 
+and for all y. Now I do have brackets because there's a 
+bunch of things going to come next, that depend on the 4x and 4y. 
+So for all x and y If x is less than y, then, there's a z which is rational, and 
+lies between x and y. So reading left to right, for all pairs 
+of real numbers x and y, with x less than y, There's a z, which is rational, and 
+lies between them. Now I didn't write exists z in Q, I 
+didn't write that, because the Q isn't a set. 
+In this case, we've got a predicate Meaning that x is rational. 
+Okay, so I'm distinguishing, I mean, what I'm doing with a lot of these examples, 
+actually is distinguishing between the various formulaism we have to express 
+things within mathematics. Sometimes we use sets, sometimes we use 
+predecates. Sometimes we'll use quantify 
+restrictions. Sometimes we use predicate restrictions. 
+They're all different ways of getting getting formality and precision into 
+statements. in, in mathematics, we, we pick the one 
+that's that's most relevant. In fact, in most mathematics, whenever we 
+use these formulas which is in this detail. 
+this is much smaller thing to, to, to, to things we have to write down in computer 
+signs. Look we're actually trying to unravel or 
+to, to learn how to unravel the formal structures beneath the statements we 
+make. Okay. 
+Well that was number six, let's press on to number seven. 
+Okay, and number seven is this famous quotation which is allegedly made by 
+Abraham Lincoln, there is some So dispute on, on websites as to who would have said 
+this. But it's it's commonly and popularly 
+described to as Abraham Lincoln. for our purpose, for our purpose, we're 
+not worry about who said it. and the issue is can we can we make it 
+precise within the mathematical language. You may fool all of the people some of 
+the time, you can even fool some of the people all of the time. 
+Where you cannot fool all of the people all of the time. 
+The reason I like this example is that the quantifiers in English are used in 
+the way we use quantifiers in English. the quantifiers come at the end of, of 
+the clauses. But in mathematics we read strictly left 
+to right and so the quantifiers have to come first. 
+So let's say f, x,t mean you can fool person Woops. 
+P that should of been a P shouldn't it. So let me just change that now. 
+Okay. Alright Fpt meaning you can fool person p 
+at time t. Then lets do these one by one. 
+You may fool all of the people some of the time. 
+That means there are some times, when you can fool all of the people. 
+There are some times when you can, the point is taking this clause, the people 
+Depend on the time, there are sometimes when you can fool all of the people, 
+there was sometime when you can fool all of the people. 
+So we have to say, there were sometimes when you can fool all of the people. 
+Then there's a second clause, and this is going to be a conjunction because these 
+are different things we're saying so there's an and if you'd like. 
+There's a understated and here. You may fool all the people some of the 
+time and you can fool some of the people all of the time, that's the second part. 
+So, and there are some people, and because quantifiers are these extreme of 
+cases, we only have there exists and for all, at least those are the, the common 
+ones. And so some, in, in, in, in, in the case 
+when we use quantifiers, some is captured simply by there is at least one. 
+And strictly speaking, that's really the logical heart of some. 
+If we say something then strictly speaking we are saying there is at least 
+one. Now arguably you can say in English, when 
+you use the word some is an implication that there's more than one. 
+Okay well you could follow that but it turns out than in mathematics It's really 
+more, more, let's just say more efficient, to just focus down on one. 
+So there's a, there's a, a specialization occurs in mathematics, that when we say 
+some things we usually mean there's at least one. 
+And, and we can capture that by the quantifier exists. 
+You can fool some of the people all of the time. 
+That means there are some people, there's at least 1 person, who can be fooled all 
+of the time. And in this clause, see what's been 
+captured that's important. I mean you can argue about. 
+you know, whether, whether some is really well captured by exists. 
+but, but, but really what's going on here is that the people that fooled can change 
+from one time to another. Okay? 
+No, I said, well, we won't, didn't I? What's really going on here, is that all 
+of the time you'll be able to, so at, for any time you can find some people. 
+Oh, is that what I was saying? Let me think about it for a minute. 
+Some of the people, all of the time. Yep. 
+I think that's correct. Okay? 
+You can fool some of the people all of the time. 
+So you can find some people who can be fooled all of the time. 
+You can find some people Who can be fooled all of the time. 
+Okay? I thought for a moment that, when I 
+worked this out a little while ago, I got it wrong. 
+But now I think that's exactly what it means. 
+There are some people who can be fooled for all of the time. 
+Okay? So I'm happy with that one. 
+I'm happy with that one. Let's look at the last one. 
+but, the but's that's just another conjunction really. 
+You can not fool all of the people all of the time. 
+I think this one is the one that's easiest because there's just to all's. 
+It's not the case that you can fool all people all time, and for this one you 
+could swap these around. You could have[UNKNOWN]. 
+And for all p. You've got, when you've got 2 universal 
+quantifiers or 2 existential quantifiers it really doesn't matter which order you 
+put them in. But when you have for all and exists it 
+really does matter which way you, you write them down. 
+So let's just recap this says there are, there are times. 
+When you can fool all of the people, a lot of times, when you can fool all of 
+the people. This, the first clause is about fooling 
+all the people. And it said a lot of time, when you can 
+do that. The second clause is different. 
+It says the right people. That you can fool all of the time. 
+It's saying there are some people, who can always be fooled. 
+You can fool all people some of the time, so there are some times when you can fool 
+all people. And you can fool some people all of the 
+time, there are some people, who can be fooled all of the time. 
+But you cannot fo, fool all of the people all of the time. 
+Okay? Well I stumbled a bit here, or at least I 
+has second thoughts for a moment, but on reflection I decided that I got it right 
+the first time and and I'm happy with those 3. 
+So, it's I hope, I hope you manage to get something similar to that. 
+This is tricky This is tricky no doubt about it. 
+That's why its a good exercise. It's a really good exercise in 
+understanding how mathematical formulism capture the kind of things we will. 
+We actually do say in the real world. And this is a real world statements. 
+One with some culture significance. Okay lets move on to number eight. 
+Okay, let's do number 8 is, is really very similar to the American Melanoma 
+Foundation example. Okay, a driver is involved in an accident 
+every 6 seconds. Okay, so we've got x is a variable to 
+denote a driver, t a variable for a 6 second interval. 
+x,t means that x is an accident during interval t. 
+The headline is written if we simply take a literal translation from this into the 
+form of this, this, this language we got here we would say there is a driver. 
+So for all times t, A is involved in an accident times t. 
+You know, six second interval. Now okay, so that's a literal 
+interpretation. Then we're going to rewrite it so that 
+it's it, so that the, the English expression really captures it in a 
+literal way. And then we would say, every six seconds 
+a driver is involved in an accident. And in that case we're saying, for every 
+six second interval, there is a driver involved in an accident. 
+Notice here that the driver can change. From one interval, to another. 
+So driver can change from one interval to another. 
+For all t, there's an x, x, t These are different. 
+These are very, very different. And this makes a huge difference in 
+mathematics. you know, as I mentioned, a lot of you 
+had trouble really seeing there was any problem with the American Melanoma 
+Foundation example. Then of course in everyday language There 
+isn't a problem because we use our understanding of the, of the real world 
+in order to[INAUDIBLE] . But when you start to make those things 
+precise for doing mathematics, in order to develop a language and a formalism, a 
+way of saying things that's totally precise and reliable, then the order in 
+which you say things makes a big, big difference. 
+And that was the whole point of that exercise and then these other ones. 
+Its to make sure that the left right ordering, of the various formulas 
+captures the logical flow. And there's a logic to this. 
+This one says, there is a driver who's in an accident. 
+Every six seconds, which is nonsensical. This one says for every six seconds, 
+there's a driver in an accident, and when we take the formal language, then the 
+distinction is, is, is really, really significant. 
+Okey dokey, well, I, I guess we finished exer-, we finished assignment five. 
+Okay, quite a lot of quite a lot of questions in there. 
+This is not easy to master but once you've mastered it boy you can, you can 
+tear through mathematical arguements at a much greater rate. 
+a lot of the difficulties people have following mathematics is they bring to 
+mathematics the sort of the inherent sloppiness. 
+and ambiguity. and vagueness. 
+Of everyday language. when you do that you just run into 
+trouble. The whole points about about this 
+formalism is if you limit it solely ambiguity. 
+Because in mathematics we very often don't have knowledge of the everyday 
+world to help ourselves out. As we do when we use language in the 
+everyday world. Okay. 
+How well, how did you guys do in assignment five? 
+Wasn't easy was it?

@@ -1,0 +1,108 @@
+Well, Question 1 picks up the same theme
+as Question 11 in the previous assignment, so let's see how it works. It's actually much more difficult,
+I think, than Question 11 of Assignment 2. Some of these really are tricky. Okay, so let's take them one by one. New trade agreement will lead to
+strong currencies in both countries. So, the trade agreement,
+that results in telling us the implication the fact that both currencies are strong. That one's is very, very straightforward. Strong Dollar means weak Yuan, strong
+Dollar implies that the Yuan is weak. Well, again, I think,
+that one's fairly straightforward. Dollar's strong,
+it follows that the Yuan is weak. Trade agreement fails on
+news of weak Dollar, so we hear that there's a weak Dollar, and that implies that
+the trade agreement fails. I'm fairly confident in
+writing that one down. I can't think of another one that
+would really capture Part C. Part D, if a trade agreement is signed. Well, this one is signaling
+very loudly implications. If a trade agreement is signed,
+then they can't both remain strong, so it's not the case that the Dollar's
+strong and the Yuan strong. Okay, now with Part E, I think we're into an example where your
+mileage might be different from mine. Okay, the question really is, what is
+a but, and I think the but means and. Following, however, I think I
+think could be one of two things. It could mean the following,
+the Dollar is weak and the Yuan is strong, and
+there is a trade agreement. In other words, there is a trade
+agreement, and this trade agreement, the Dollar is weak and the Yuan is strong. In other words, it's all conjunction, so
+you could interpret following it meaning that that happens first,
+and then those two happen. However, you could also say, well, it was the new trade agreement that led to
+these coincident strengths and weaknesses. You could, I think quite legitimately,
+say the following. There's a trade agreement,
+and as a result, the Dollar's weak and Yuan is strong. I think that's perfectly legitimate,
+I was doing two interpretations, depending on whether
+you've been following. Just one thing follows after another Yuan
+time, follows because of cordiality. Okay, what about Number 5? Well, this one is, again,
+signalling implication, so the trade agreement was signed, then a rise in the Yuan will
+result in a fall in the Dollar. You could actually write different way. You could say that there's
+really two assumptions here. Two things to happen. If there's a trade agreement signed, and then if the Yuan rises, it follows that the Dollar falls. But, those are actually equivalent as
+you'd be able to demonstrate using truth tables if you want. Well, they're both ways
+of interpreting that. You could say that you've got
+an implication of an implication or you could say you basically got
+an implication assumptions. I think this is more of a literal
+interpretation and this one is more of semantic interpretation where you
+You look at what these things mean. Okay, this one, the way I think I
+would write this one is to say, if there's a trade agreement signed,
+then these are linked. Which is basically equivalent
+to the [INAUDIBLE]. Or if you want to spread it out,
+you would say, trade agreement implies that the dollar rise
+leads to the yuan rise and the yuan rise leads to a dollar
+rise They are both the same thing. They are actually,
+is an abbreviation for that. The bar conditional abbreviates
+to the two conditionals. Try to clean that one a little bit, okay? Okay, new trade agreements will be good
+for one side, but no one knows which. Okay?
+What we're really doing here, is talking about an exclusive OR. So that was something that
+caused lots of you some grief. In an early example. In the early assignment. Okay, new trade agreement
+would be good for one side. So either the dollar's strong or
+the yen's strong. But, and but is conjunction,
+we've already noted that. It's not the case that they both hold. This really forces
+the [INAUDIBLE] an exclusive or. One of them holds, but not both of them. That was question 1 and as I mentioned, some of these you
+may come up with different answers. I'm pretty confident about these. When I look at these sentences,
+these are what these mean to me. But we are taking something in everyday
+language, in natural language. In fact, we're taking stereotypical
+newspaper headlines, which are abbreviated natural language, And we're trying to
+interpret them in the formal language of logic, so we're taking something,
+the same precise depends upon context and knowledge of culture and we're trying to
+express it in a logical formalism and that's a lot of
+interpretation differences. Your management if different from mine
+on one or two of these things As I said, I could defend each of these,
+and I tried to as I went through. But you might come up with an answer
+that you could defend, and that's fine. Okay, let's move on. Well, for number 2,
+I've put my answers in bold. If that doesn't show up on your screen,
+these Other ones that are involved. I've started with fi and I negated it so
+true becomes false, true becomes false, false becomes true, false becomes true. I have psi, we've already
+worked out the truth table for the conditional and
+we've seen it's T F T T. Now we can take fi Now we
+can take not phi and psi, we can combine these two columns
+with a disjunction to get this guy. So this will be true whenever
+one of these is true, which means that one of them's true here,
+neither is true here so we get a false. They're both true here, we get a true. One of them's true here we'll get a true. So this column comes from combining
+these two with this junction. And now we simply compare these two,
+and this is really getting to number 3. We can compare these two and
+observe that every entry is the same. And since the truth values are the same, The conclusion we can draw is that Phi yields Psi is equivalent to not Phi or
+Psi. And that takes care of 2 and of 3. We're turning to number 4 now. We've got 4 columns to fill in and
+again I've written them in bold face but you may not be able to see
+the bold face on your screen but these are the four entries that I've got. I began with the two columns we're given. The standard range of possibilities for
+T and F for phi and psy. I negated the psi value
+to give me not psi. So, a T became an F,
+an F became a T, T to F, F to T. Then, I wrote down the values for
+phi yield psi, which we know. We've already worked that out,
+which T, F, T, T. Then, I negated those,
+to give me phi does not yield psi. So, a T becomes an F,
+F becomes T T to F, T to F. And then I combined the first column with the third column
+using conjunction to give me this one. And with conjunction, you have to have
+both of them too to get it through. Well we got a T and then F. And that F means,
+we're going to have an F there. Here, we've got a T and a T. So I get a T there. Here, I've got two Fs, gives me an F. And here, I've got one F. So I've also got an F. Well that closed on all of the columns. And then to answer question three, we just
+noticed that these guys are all the same. And hence, we may conclude. That phi does not yield psi. Is equivalent, To phi and not psi. And in fact what I'd like to do now
+is just recall the discussion we had. To obtain the truth table for phi yields psi. If you remember, to do that, we had to look at phi does not yield psi. In order to find the truth values
+in the case where phi was false, we ended up having to look
+at phi does not yield psi. And this truth table, here, sort of shines a light on what
+was going on; it illustrates or it explains to us why looking
+at that Enabled us to work out the two problematic truth values for
+the truth table for yields. For implication, when phi was false. Because it's this equivalence
+that we were capitalizing on. That phi does not yield psi, if phi is
+true, and nevertheless, psi is false. Okey-dokey? Well, that's questions four and
+five for you. How did you do? Okay, let me finish this tutorial with
+this little puzzle I'll leave you with. A woman was driving in her
+car along a black road. She did not have her car lights on. There was no moon and
+no light from the stars. A black dog was asleep in
+the middle of the road. As the woman approached the dog,
+she swerved to avoid it, and the animal slept on. How did the woman know to
+swerve around the dog? And that would just give you one clue. Remember, the focus in this part of the
+course is on being precise about the use of language and being very careful about
+the information that language conveys. And with that clue, I'll leave you
+to puzzle this one out on your own. Bye-bye for now.
