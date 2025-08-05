@@ -1,2 +1,0 @@
-OpenAI developed the Mistral model as a powerful open-source alternative to proprietary LLMs.
-It is designed to be fast, efficient, and capable of multitask reasoning.

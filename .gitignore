@@ -46,3 +46,8 @@ coverage.xml
 # Environment files
 .env
 .env.*
+
+# Test data
+docs/*
+!docs/.gitkeep
+
