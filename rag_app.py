@@ -130,6 +130,8 @@ def plot_session_timeline(project_name):
 
 
 # --- Main Application ---
+# --- Phase 1 - Step 4: Per-document Indexing and Retrieval ---
+
 def main():
     st.set_page_config(layout="wide")
     st.sidebar.title("📁 Project & Session Setup")
