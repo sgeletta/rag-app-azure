@@ -1,53 +1,17 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+# Streamlit secrets - DO NOT COMMIT
+.streamlit/secrets.toml
 
-# Virtual environment
+# Generated data directories
+faiss_indexes/
+logs/
+docs/
+
+# Python virtual environment
+venv/
 .venv/
 env/
-venv/
-ENV/
-
-# Jupyter Notebook checkpoints
-.ipynb_checkpoints
-
-# VS Code settings
-.vscode/
-
-# MacOS
-.DS_Store
-
-# Logs and data
-*.log
-*.sqlite
-logs/
-*.db
-
-# FAISS indexes
-faiss_indexes/
-
-# Streamlit cache
-.streamlit/
-
-# Python metadata
-*.egg-info/
-.eggs/
-*.egg
-
-# Compiled C extensions
-*.so
-
-# Test outputs
-coverage.xml
-*.cover
-*.py,cover
-
-# Environment files
 .env
-.env.*
 
-# Test data
-docs/*
-!docs/.gitkeep
-
+# Python cache
+__pycache__/
+*.pyc

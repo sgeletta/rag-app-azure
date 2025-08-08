@@ -51,5 +51,6 @@ while True:
     query = input("\nAsk a question (or 'exit'): ")
     if query.lower() == "exit":
         break
-    result = qa.run(query)
+    response = qa.invoke({"query": query})
+    result = response.get("result", "Sorry, I could not find an answer.")
     print("\nAnswer:", result)

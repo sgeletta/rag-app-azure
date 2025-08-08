@@ -5,6 +5,7 @@ import pandas as pd
 import sqlite3
 import matplotlib.pyplot as plt
 import seaborn as sns
+import pickle
 import streamlit as st
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
@@ -17,10 +18,6 @@ from langchain_community.document_loaders import (TextLoader, PDFPlumberLoader,
 
 # --- Authentication Setup ---
 def authenticate_user():
-    valid_users = {
-        "simon": "ragpass123",
-        "admin": "secureadmin"
-    }
     if "authenticated" not in st.session_state:
         st.session_state["authenticated"] = False
 
@@ -31,7 +28,7 @@ def authenticate_user():
             password = st.text_input("Password", type="password")
             submitted = st.form_submit_button("Login")
             if submitted:
-                if username in valid_users and valid_users[username] == password:
+                if username in st.secrets["users"] and st.secrets["users"][username] == password:
                     st.session_state["authenticated"] = True
                     st.session_state["username"] = username
                     st.rerun()
@@ -154,7 +151,8 @@ def main():
     if os.path.exists(faiss_path):
         try:
             db = FAISS.load_local(faiss_path, embeddings=embedding, allow_dangerous_deserialization=True)
-        except:
+        except (IOError, EOFError, pickle.UnpicklingError) as e:
+            st.error(f"Failed to load the FAISS index. It might be corrupted. Please consider removing and re-indexing documents. Error: {e}")
             db = None
 
     if selected_tab == "Q&A interface":
@@ -201,22 +199,27 @@ def main():
             st.subheader("🗑️ Manage Documents")
             docs_to_remove = st.multiselect("Select documents to remove:", existing_docs)
             if st.button("Remove selected documents") and docs_to_remove:
+                # Efficiently remove documents from the index without rebuilding
+                if db:
+                    full_paths_to_remove = {os.path.join(project_dir, doc) for doc in docs_to_remove}
+                    ids_to_remove = [
+                        doc_id for doc_id, doc in db.docstore._dict.items()
+                        if doc.metadata.get("source") in full_paths_to_remove
+                    ]
+                    if ids_to_remove:
+                        db.delete(ids_to_remove)
+                        db.save_local(faiss_path)
+
+                # Physically remove the files
                 for doc_name in docs_to_remove:
                     os.remove(os.path.join(project_dir, doc_name))
-                remaining_docs = os.listdir(project_dir)
-                all_docs = []
-                for f in remaining_docs:
-                    all_docs.extend(load_document(os.path.join(project_dir, f)))
-                if all_docs:
-                    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
-                    chunks = splitter.split_documents(all_docs)
-                    db = FAISS.from_documents(chunks, embedding)
-                    db.save_local(faiss_path)
-                else:
-                    if os.path.exists(faiss_path):
-                        os.remove(faiss_path)
-                    db = None
+
+                # If no documents are left, remove the index file
+                if not os.listdir(project_dir) and os.path.exists(faiss_path):
+                    os.remove(faiss_path)
+
                 st.success("Selected documents removed and index updated.")
+                st.rerun()
 
         existing_docs = os.listdir(project_dir)
 
@@ -228,7 +231,8 @@ def main():
             if st.button("Submit question") and user_query:
                 llm = Ollama(model="mistral")
                 qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=db.as_retriever())
-                result = qa_chain.run(user_query)
+                response = qa_chain.invoke({"query": user_query})
+                result = response.get("result", "Sorry, I could not find an answer.")
                 st.session_state.qa_pairs.append((user_query, result))
                 log_to_db(project_name, user_query, result, existing_docs, selected_tag)
                 st.rerun()
