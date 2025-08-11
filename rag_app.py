@@ -78,26 +78,54 @@ def load_document(path):
         st.warning(f"Unsupported file type: {ext}. Skipping.")
         return []
 
+def _migrate_log_db_schema(conn):
+    """Ensures the 'logs' table has the 'feedback' column."""
+    c = conn.cursor()
+    try:
+        # Check if 'feedback' column exists
+        c.execute("PRAGMA table_info(logs)")
+        columns = [info[1] for info in c.fetchall()]
+        if 'feedback' not in columns:
+            # Add the feedback column with a default value for existing rows
+            c.execute("ALTER TABLE logs ADD COLUMN feedback INTEGER DEFAULT 0")
+            conn.commit()
+    except sqlite3.OperationalError:
+        # This can happen if the 'logs' table doesn't exist at all yet.
+        # The calling function's CREATE TABLE IF NOT EXISTS will handle it.
+        pass
+
 def log_to_db(project_name, query, answer, source_documents, user_tag):
     db_path = os.path.join(LOG_DIR, f"query_log_{project_name}.db")
     conn = sqlite3.connect(db_path)
+    _migrate_log_db_schema(conn)
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS logs
-                 (timestamp TEXT, username TEXT, user_tag TEXT, query TEXT, answer TEXT, documents TEXT)''')
+                 (timestamp TEXT, username TEXT, user_tag TEXT, query TEXT, answer TEXT, documents TEXT, feedback INTEGER DEFAULT 0)''')
     
     # Extract unique source filenames from the document objects
     doc_names = sorted(list(set([os.path.basename(doc.metadata.get("source", "unknown")) for doc in source_documents])))
 
-    c.execute("INSERT INTO logs VALUES (?, ?, ?, ?, ?, ?)",
+    c.execute("INSERT INTO logs (timestamp, username, user_tag, query, answer, documents) VALUES (?, ?, ?, ?, ?, ?)",
               (datetime.now().isoformat(),
                st.session_state.get("username", "unknown"),
                user_tag,
                query,
-               answer,
-               ", ".join(doc_names)))
+               answer, ", ".join(doc_names)))
+    log_id = c.lastrowid
     conn.commit()
     conn.close()
+    return log_id
 
+def update_feedback(project_name, log_id, feedback_value):
+    """Updates the feedback for a specific log entry."""
+    db_path = os.path.join(LOG_DIR, f"query_log_{project_name}.db")
+    conn = sqlite3.connect(db_path)
+    _migrate_log_db_schema(conn)
+    c = conn.cursor()
+    # Using rowid to update is standard and efficient in SQLite
+    c.execute("UPDATE logs SET feedback = ? WHERE rowid = ?", (feedback_value, log_id))
+    conn.commit()
+    conn.close()
 
 def get_user_tags(project_name):
     db_path = os.path.join(LOG_DIR, f"query_log_{project_name}.db")
@@ -114,14 +142,23 @@ def get_session_summary(project_name):
     if not os.path.exists(db_path):
         return pd.DataFrame()
     conn = sqlite3.connect(db_path)
+    _migrate_log_db_schema(conn)
     df = pd.read_sql_query("SELECT * FROM logs", conn)
     conn.close()
     if df.empty:
         return pd.DataFrame()
+    
+    # Ensure feedback column exists and is numeric, fill NaNs
+    if 'feedback' not in df.columns:
+        df['feedback'] = 0
+    df['feedback'] = pd.to_numeric(df['feedback'], errors='coerce').fillna(0)
+
     summary = df.groupby("user_tag").agg(
         num_queries=("query", "count"),
         last_query_time=("timestamp", "max"),
-        documents_used=("documents", lambda x: ', '.join(set(', '.join(x).split(', '))))
+        documents_used=("documents", lambda x: ', '.join(sorted(list(set(i.strip() for i in ', '.join(x).split(',') if i.strip()))))),
+        positive_feedback=("feedback", lambda x: (x > 0).sum()),
+        negative_feedback=("feedback", lambda x: (x < 0).sum())
     ).reset_index()
     return summary
 
@@ -138,15 +175,64 @@ def plot_session_timeline(project_name):
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     df["date"] = df["timestamp"].dt.date
     grouped = df.groupby(["date", "user_tag"]).size().reset_index(name="queries")
-    plt.figure(figsize=(8, 4))
-    sns.lineplot(data=grouped, x="date", y="queries", hue="user_tag", marker="o")
-    plt.title("Queries Over Time by User Tag")
-    plt.xlabel("Date")
-    plt.ylabel("Query Count")
+    
+    fig, ax = plt.subplots(figsize=(10, 5))
+    sns.lineplot(data=grouped, x="date", y="queries", hue="user_tag", marker="o", ax=ax)
+    ax.set_title("Queries Over Time by User Tag")
+    ax.set_xlabel("Date")
+    ax.set_ylabel("Query Count")
     plt.xticks(rotation=45)
-    plt.tight_layout()
-    return plt
+    fig.tight_layout()
+    return fig
 
+def plot_feedback_distribution(project_name):
+    """Generates a bar chart showing feedback distribution by user tag."""
+    db_path = os.path.join(LOG_DIR, f"query_log_{project_name}.db")
+    if not os.path.exists(db_path):
+        return None
+    conn = sqlite3.connect(db_path)
+    _migrate_log_db_schema(conn)
+    # Select only logs that have received feedback
+    df = pd.read_sql_query("SELECT user_tag, feedback FROM logs WHERE feedback != 0", conn)
+    conn.close()
+    if df.empty:
+        return None
+
+    df['feedback_type'] = df['feedback'].apply(lambda x: 'Positive' if x > 0 else 'Negative')
+    
+    fig, ax = plt.subplots(figsize=(10, 5))
+    sns.countplot(data=df, x='user_tag', hue='feedback_type', palette={'Positive': 'mediumseagreen', 'Negative': 'lightcoral'}, ax=ax)
+    ax.set_title("Feedback Distribution by User Tag")
+    ax.set_xlabel("User Tag")
+    ax.set_ylabel("Feedback Count")
+    plt.xticks(rotation=45)
+    fig.tight_layout()
+    return fig
+
+def plot_daily_query_counts(project_name):
+    """Generates a faceted bar chart of daily query counts per user tag."""
+    db_path = os.path.join(LOG_DIR, f"query_log_{project_name}.db")
+    if not os.path.exists(db_path):
+        return None
+    conn = sqlite3.connect(db_path)
+    df = pd.read_sql_query("SELECT timestamp, user_tag FROM logs", conn)
+    conn.close()
+    if df.empty:
+        return None
+
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
+    df["date"] = df["timestamp"].dt.date
+    daily_counts = df.groupby(["date", "user_tag"]).size().reset_index(name="query_count")
+
+    g = sns.catplot(
+        data=daily_counts, x="date", y="query_count", col="user_tag",
+        kind="bar", height=4, aspect=1.2, col_wrap=4
+    )
+    g.fig.suptitle("Daily Query Counts per Session", y=1.03)
+    g.set_axis_labels("Date", "Query Count")
+    g.set_xticklabels(rotation=45, ha='right')
+    g.tight_layout(rect=[0, 0, 1, 0.97])
+    return g.fig
 # --- UI Components ---
 
 def render_document_management(project_name, project_dir, db, faiss_path, db_session_key):
@@ -266,15 +352,22 @@ def render_qa_interface(project_name, project_dir, db, selected_tag):
                     response = qa_chain.invoke({"query": user_query}, config={"callbacks": []})
                     result = response.get("result", "Sorry, I could not find an answer.")
                     source_documents = response.get("source_documents", [])
-                    st.session_state[qa_session_key].append((user_query, result, source_documents))
-                    log_to_db(project_name, user_query, result, source_documents, selected_tag)
+                    log_id = log_to_db(project_name, user_query, result, source_documents, selected_tag)
+                    st.session_state[qa_session_key].append((user_query, result, source_documents, log_id))
 
         # Display conversation history
         if st.session_state[qa_session_key]:
             st.subheader("Conversation History")
-            for q, a, sources in reversed(st.session_state[qa_session_key]):
+            for q, a, sources, log_id in reversed(st.session_state[qa_session_key]):
                 st.markdown(f"**Q:** {q}")
                 st.markdown(f"**A:** {a}")
+
+                col1, col2, _ = st.columns([1, 1, 10])
+                with col1:
+                    st.button("👍", key=f"up_{log_id}", on_click=update_feedback, args=(project_name, log_id, 1))
+                with col2:
+                    st.button("👎", key=f"down_{log_id}", on_click=update_feedback, args=(project_name, log_id, -1))
+
                 if sources:
                     with st.expander("View Sources"):
                         for i, doc in enumerate(sources):
@@ -322,12 +415,32 @@ def render_analytics_dashboard(project_name):
         else:
             st.info("No session data to summarize.")
 
-        st.subheader("Query Timeline")
-        timeline_plot = plot_session_timeline(project_name)
-        if timeline_plot:
-            st.pyplot(timeline_plot)
+        st.divider()
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.subheader("Query Timeline")
+            timeline_plot = plot_session_timeline(project_name)
+            if timeline_plot:
+                st.pyplot(timeline_plot)
+            else:
+                st.info("No timeline data available.")
+        
+        with col2:
+            st.subheader("Feedback Analysis")
+            feedback_plot = plot_feedback_distribution(project_name)
+            if feedback_plot:
+                st.pyplot(feedback_plot)
+            else:
+                st.info("No feedback has been provided yet.")
+
+        st.divider()
+        st.subheader("Daily Query Counts per Session")
+        daily_counts_plot = plot_daily_query_counts(project_name)
+        if daily_counts_plot:
+            st.pyplot(daily_counts_plot)
         else:
-            st.info("No timeline data available.")
+            st.info("No query data available for this visualization.")
     else:
         st.info("No analytics available yet. Ask some questions first!")
 

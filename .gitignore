@@ -7,6 +7,7 @@ __pycache__/
 .venv/
 env/
 venv/
+venv_upgrade_test/
 ENV/
 
 # Jupyter Notebook checkpoints
@@ -50,4 +51,3 @@ coverage.xml
 # Test data
 docs/*
 !docs/.gitkeep
-
