@@ -19,21 +19,24 @@ ENV/
 # MacOS
 .DS_Store
 
-# Logs and data
-*.log
-*.sqlite
-logs/
-*.db
-
-# FAISS indexes
-faiss_indexes/
+# --- Data, Logs, and Indexes ---
+# Ignore user-specific data, but keep the directories in the repo via .gitkeep files.
+docs/*
+!docs/.gitkeep
+logs/*
+!logs/.gitkeep
+faiss_indexes/*
+!faiss_indexes/.gitkeep
 
 # Container data volumes
 # This is generated locally and should not be in version control
 ollama_data/
 
-# Streamlit cache
-.streamlit/
+# --- Secrets and Environment Variables ---
+# Ignore user-specific secrets and environment files.
+.streamlit/secrets.toml
+.env
+.env.*
 
 # Python metadata
 *.egg-info/
@@ -47,11 +50,3 @@ ollama_data/
 coverage.xml
 *.cover
 *.py,cover
-
-# Environment files
-.env
-.env.*
-
-# Test data
-docs/*
-!docs/.gitkeep
