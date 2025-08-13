@@ -2,6 +2,7 @@ import os
 import pickle
 import sqlite3
 from datetime import datetime
+import shutil
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -286,32 +287,46 @@ def render_document_management(project_name, project_dir, db, faiss_path, db_ses
         st.subheader("🗑️ Manage Existing Documents")
         docs_to_remove = st.multiselect("Select documents to remove:", existing_docs)
         if st.button("Remove Selected Documents") and docs_to_remove:
-            try:
-                if db:
-                    full_paths_to_remove = {os.path.join(project_dir, doc) for doc in docs_to_remove}
-                    # This part is fragile as it uses a private attribute `_dict`.
-                    # It's a workaround for efficient deletion without rebuilding the index.
-                    ids_to_remove = [
-                        doc_id for doc_id, doc in db.docstore._dict.items()
-                        if doc.metadata.get("source") in full_paths_to_remove
-                    ]
-                    if ids_to_remove:
-                        db.delete(ids_to_remove)
-                        db.save_local(faiss_path)
-                        st.session_state[db_session_key] = db
-            except Exception as e:
-                st.error(f"Error updating index: {e}. Please consider re-indexing from scratch.")
-
+            # 1. Remove the physical files
             for doc_name in docs_to_remove:
                 os.remove(os.path.join(project_dir, doc_name))
 
-            if not os.listdir(project_dir) and os.path.exists(faiss_path):
-                os.remove(faiss_path)
-                st.session_state[db_session_key] = None
+            # 2. Get list of remaining files
+            remaining_docs_list = os.listdir(project_dir)
 
-            st.success("Selected documents removed and index updated.")
+            # 3. If there are remaining files, re-index them. Otherwise, clear the index.
+            if remaining_docs_list:
+                with st.spinner(f"Removed {len(docs_to_remove)} document(s). Re-building index..."):
+                    remaining_doc_paths = [os.path.join(project_dir, doc) for doc in remaining_docs_list]
+
+                    all_docs = []
+                    for path in remaining_doc_paths:
+                        all_docs.extend(load_document(path))
+
+                    if all_docs:
+                        splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+                        chunks = splitter.split_documents(all_docs)
+
+                        # Create new index from remaining docs
+                        new_db = FAISS.from_documents(chunks, embedding)
+                        new_db.save_local(faiss_path) # This will overwrite the old one
+                        st.session_state[db_session_key] = new_db
+                        st.success("Index successfully rebuilt with remaining documents.")
+                    else:
+                        # No content could be extracted from remaining files
+                        st.session_state[db_session_key] = None
+                        if os.path.exists(faiss_path):
+                            shutil.rmtree(faiss_path)
+                        st.warning("Could not extract content from remaining files. Index is now empty.")
+            else:
+                # No documents left, so remove the index completely
+                st.session_state[db_session_key] = None
+                if os.path.exists(faiss_path):
+                    shutil.rmtree(faiss_path)
+                st.success("All documents removed. Index is now empty.")
+
             st.rerun()
-        
+
         st.divider()
 
         with st.expander("📄 Document Previews", expanded=False):
