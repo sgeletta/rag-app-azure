@@ -28,6 +28,10 @@ logs/
 # FAISS indexes
 faiss_indexes/
 
+# Container data volumes
+# This is generated locally and should not be in version control
+ollama_data/
+
 # Streamlit cache
 .streamlit/
 

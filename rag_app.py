@@ -37,13 +37,20 @@ def authenticate_user():
             username = st.text_input("Username")
             password = st.text_input("Password", type="password")
             submitted = st.form_submit_button("Login")
-            if submitted:
-                if username in st.secrets["users"] and st.secrets["users"][username] == password:
-                    st.session_state["authenticated"] = True
-                    st.session_state["username"] = username
-                    st.rerun()
-                else:
-                    st.error("Invalid username or password.")
+            if submitted:                
+                try:
+                    # Check if the provided username exists and the password matches.
+                    if username in st.secrets["users"] and st.secrets["users"][username] == password:
+                        st.session_state["authenticated"] = True
+                        st.session_state["username"] = username
+                        st.rerun()
+                    else:
+                        st.error("Invalid username or password.")
+                except (KeyError, AttributeError):
+                    st.error(
+                        "User authentication is not configured. "
+                        "Please ensure a `.streamlit/secrets.toml` file exists with user credentials."
+                    )
         return False
     return True
 
@@ -60,7 +67,9 @@ def get_embedding_model():
 @st.cache_resource
 def get_llm():
     """Loads the Ollama LLM and caches it."""
-    return Ollama(model="mistral")
+    # Check for the Docker-specific environment variable, otherwise use the default localhost.
+    base_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
+    return Ollama(model="mistral", base_url=base_url)
 
 def load_document(path):
     """Loads a document from a file path based on its extension."""
@@ -129,13 +138,22 @@ def update_feedback(project_name, log_id, feedback_value):
     conn.close()
 
 def get_user_tags(project_name):
+    """Gets a list of user tags, ordered by most recently used."""
     db_path = os.path.join(LOG_DIR, f"query_log_{project_name}.db")
     if not os.path.exists(db_path):
         return []
     conn = sqlite3.connect(db_path)
-    df = pd.read_sql_query("SELECT DISTINCT user_tag FROM logs", conn)
-    conn.close()
-    return df["user_tag"].tolist()
+    try:
+        # Order tags by the most recent timestamp for that tag
+        query = "SELECT user_tag FROM logs GROUP BY user_tag ORDER BY MAX(timestamp) DESC"
+        df = pd.read_sql_query(query, conn)
+        tags = df["user_tag"].tolist()
+    except (pd.io.sql.DatabaseError, sqlite3.OperationalError):
+        # Fallback for empty db or table not yet created
+        tags = []
+    finally:
+        conn.close()
+    return tags
 
 
 def get_session_summary(project_name):
@@ -394,7 +412,7 @@ def render_qa_interface(project_name, project_dir, db, selected_tag):
         st.info("Please go to the 'Document Management' tab to upload and index documents to begin the Q&A session.")
 
 
-def render_log_reports(project_name, selected_tag):
+def render_log_reports(project_name, log_filter_tag):
     st.header("🧾 Query Logs")
     db_file = os.path.join(LOG_DIR, f"query_log_{project_name}.db")
     if os.path.exists(db_file):
@@ -402,16 +420,20 @@ def render_log_reports(project_name, selected_tag):
         df = pd.read_sql_query("SELECT * FROM logs", conn)
         conn.close()
 
-        if not df.empty:
-            if selected_tag != "all_tags":
-                df = df[df["user_tag"] == selected_tag]
-            st.dataframe(df, use_container_width=True)
+        if not df.empty:            
+            df_to_display = df.copy()
+            if log_filter_tag != "Show All":
+                df_to_display = df[df["user_tag"] == log_filter_tag]
+            st.dataframe(df_to_display, use_container_width=True)
             
-            csv_data = df.to_csv(index=False).encode('utf-8')
+            csv_data = df_to_display.to_csv(index=False).encode('utf-8')
+            # Make filename safe and descriptive
+            filter_name = "all" if log_filter_tag == "Show All" else log_filter_tag
+
             st.download_button(
                 "Download Logs as CSV",
                 data=csv_data,
-                file_name=f"log_export_{project_name}_{selected_tag}.csv",
+                file_name=f"log_export_{project_name}_{filter_name}.csv",
                 mime="text/csv",
             )
         else:
@@ -477,11 +499,29 @@ def main():
                 del st.session_state[key]
         st.rerun()
 
+    # --- UI for selecting session tag and log filter ---
     existing_tags = get_user_tags(project_name)
-    tag_options = ["all_tags"] + existing_tags + ["<new>"]
-    selected_tag = st.sidebar.selectbox("Filter by or create a User/Session Tag", tag_options)
-    if selected_tag == "<new>":
-        selected_tag = st.sidebar.text_input("Enter new tag", f"session_{datetime.now():%H%M%S}")
+    st.sidebar.subheader("🏷️ Session & Filtering")
+
+    # 1. Select tag for the current Q&A session
+    session_tag_options = existing_tags + ["<new>"]
+    # Set a sensible default: the most recent tag, or "<new>" if none exist.
+    default_session_tag_index = 0 if existing_tags else session_tag_options.index("<new>")
+    
+    session_tag_selection = st.sidebar.selectbox(
+        "Tag for this Q&A session:",
+        session_tag_options,
+        index=default_session_tag_index
+    )
+    
+    if session_tag_selection == "<new>":
+        session_tag = st.sidebar.text_input("Enter new tag name:", f"session_{datetime.now():%H%M%S}")
+    else:
+        session_tag = session_tag_selection
+
+    # 2. Select filter for the log reports tab
+    log_filter_options = ["Show All"] + existing_tags
+    log_filter_tag = st.sidebar.selectbox("Filter logs by tag:", log_filter_options)
 
     # --- Vector DB Loading ---
     embedding = get_embedding_model()
@@ -499,8 +539,8 @@ def main():
                 )
             except (IOError, EOFError, pickle.UnpicklingError) as e:
                 st.error(f"Failed to load FAISS index: {e}. A re-index is required.")
-                if os.path.exists(faiss_path):
-                    os.remove(faiss_path)
+                if os.path.exists(faiss_path) and os.path.isdir(faiss_path):
+                    shutil.rmtree(faiss_path)
 
     db = st.session_state[db_session_key]
 
@@ -513,11 +553,11 @@ def main():
     selected_tab = st.radio("Navigation", tabs, horizontal=True, index=default_tab_index)
 
     if selected_tab == "Q&A Interface":
-        render_qa_interface(project_name, project_dir, db, selected_tag)
+        render_qa_interface(project_name, project_dir, db, session_tag)
     elif selected_tab == "Document Management":
         render_document_management(project_name, project_dir, db, faiss_path, db_session_key)
     elif selected_tab == "Log Reports":
-        render_log_reports(project_name, selected_tag)
+        render_log_reports(project_name, log_filter_tag)
     elif selected_tab == "Analytics Dashboard":
         render_analytics_dashboard(project_name)
 

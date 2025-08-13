@@ -1,15 +1,15 @@
 streamlit
-langchain
-langchain-community
-faiss-cpu
-huggingface-hub
-sentence-transformers
-PyPDF2
-pypdf
-docx2txt
-unstructured
-cryptography>=3.1
-tqdm
+pandas
 matplotlib
 seaborn
-pandas
+langchain
+langchain-community
+langchain-ollama
+sentence-transformers
+faiss-cpu
+pdfplumber
+unstructured
+python-docx
+tiktoken
+openpyxl # Dependency for pandas/excel, good to have
+lxml # Dependency for some unstructured loaders
