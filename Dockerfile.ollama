@@ -1,0 +1,22 @@
+# Use the official Ollama image as a base
+FROM ollama/ollama
+
+# Set the default model to pull.
+# You can change this by passing a --build-arg MODEL=<model_name> during the build.
+ARG MODEL=mistral
+
+# This is the crucial part. The `ollama pull` command needs a running Ollama
+# server. The base `ollama/ollama` image only starts the server at runtime.
+# To solve this, we start the server in the background within the RUN command,
+# wait for it to be ready by polling it, and then pull the model.
+RUN /bin/sh -c " \
+    ollama serve & \
+    while ! ollama list > /dev/null 2>&1; do \
+      echo 'Waiting for Ollama server to be ready...'; \
+      sleep 1; \
+    done; \
+    echo 'Ollama server is ready. Pulling model: ${MODEL}'; \
+    ollama pull ${MODEL}"
+
+# The default entrypoint and command from the base image will be used,
+# which is to start the ollama server.

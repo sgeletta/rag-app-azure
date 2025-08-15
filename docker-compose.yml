@@ -1,28 +1,41 @@
 services:
   rag-app:
     build: .
-    image: sgeletta/rag-app:latest
-    container_name: rag_app_streamlit
+    container_name: rag-app
     ports:
       - "8501:8501"
     volumes:
       - ./docs:/app/docs
       - ./faiss_indexes:/app/faiss_indexes
       - ./logs:/app/logs
-      - ./.streamlit:/app/.streamlit
     environment:
-      # This tells the app inside the container where to find the ollama service.
-      # 'ollama' is the name of the service defined below.
-      OLLAMA_BASE_URL: http://ollama:11434
+      # This allows the app to find the ollama service on the Docker network
+      - OLLAMA_HOST=http://ollama:11434
     depends_on:
-      - ollama
-    restart: unless-stopped
+      ollama:
+        condition: service_healthy
+    networks:
+      - rag-net
 
   ollama:
-    image: ollama/ollama:latest
-    container_name: rag_app_ollama
-    ports:
-      - "11434:11434"
+    # Build a custom ollama image that includes the model
+    build:
+      context: .
+      dockerfile: Dockerfile.ollama
+      args:
+        - MODEL=mistral # Specify the model to pre-load here
+    container_name: ollama
     volumes:
       - ./ollama_data:/root/.ollama
-    restart: unless-stopped
+    healthcheck:
+      # Test that the ollama server is running and responsive.
+      test: ["CMD", "curl", "-f", "http://localhost:11434"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - rag-net
+
+networks:
+  rag-net:
+    driver: bridge
