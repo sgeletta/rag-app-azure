@@ -8,7 +8,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 import streamlit as st
-from langchain.chains import RetrievalQA
+from langchain.chains import LLMChain, RetrievalQA
+from langchain.prompts import PromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import (
     CSVLoader,
@@ -19,6 +20,7 @@ from langchain_community.document_loaders import (
 )
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.llms import Ollama
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain_community.vectorstores import FAISS
 
 # --- Constants ---
@@ -69,7 +71,10 @@ def get_llm():
     """Loads the Ollama LLM and caches it."""
     # Check for the Docker-specific environment variable, otherwise use the default localhost.
     base_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
-    return Ollama(model="mistral", base_url=base_url)
+    return Ollama(
+        model="mistral",
+        base_url=base_url,
+        callbacks=[StreamingStdOutCallbackHandler()])
 
 def load_document(path):
     """Loads a document from a file path based on its extension."""
@@ -372,34 +377,55 @@ def render_qa_interface(project_name, project_dir, db, selected_tag):
         with st.form("qa_form", clear_on_submit=True):
             user_query = st.text_input("Enter your question:", key="user_query")
             submitted = st.form_submit_button("Submit")
-            if submitted and user_query:
-                llm = get_llm()
-                qa_chain = RetrievalQA.from_chain_type(
-                    llm=llm,
-                    retriever=db.as_retriever(),
-                    return_source_documents=True
-                )
-                with st.spinner("Thinking..."):
-                    # Pass an empty list of callbacks to work around a potential
-                    # version incompatibility issue between langchain and pydantic.
-                    response = qa_chain.invoke({"query": user_query}, config={"callbacks": []})
-                    result = response.get("result", "Sorry, I could not find an answer.")
-                    source_documents = response.get("source_documents", [])
-                    log_id = log_to_db(project_name, user_query, result, source_documents, selected_tag)
-                    st.session_state[qa_session_key].append((user_query, result, source_documents, log_id))
+
+        if submitted and user_query:
+            llm = get_llm()
+            retriever = db.as_retriever()
+
+            # 1. Retrieve relevant documents
+            with st.spinner("Searching for relevant documents..."):
+                source_documents = retriever.invoke(user_query)
+
+            # 2. Prepare the context and prompt for the LLM
+            context = "\n\n".join([doc.page_content for doc in source_documents])
+            template = """
+            Use the following pieces of context to answer the question at the end.
+            If you don't know the answer, just say that you don't know, don't try to make up an answer.
+            Keep the answer concise.
+
+            Context: {context}
+
+            Question: {question}
+
+            Helpful Answer:
+            """
+            prompt = PromptTemplate.from_template(template)
+            llm_chain = LLMChain(llm=llm, prompt=prompt)
+
+            # 3. Stream the response to the UI and capture the full text
+            with st.chat_message("user"):
+                st.markdown(user_query)
+            with st.chat_message("assistant"):
+                full_response = st.write_stream(llm_chain.stream({"context": context, "question": user_query}))
+
+            # 4. Log the interaction and update session state
+            log_id = log_to_db(project_name, user_query, full_response, source_documents, selected_tag)
+            st.session_state[qa_session_key].append((user_query, full_response, source_documents, log_id))
+            st.rerun() # Rerun to display the new message in the history below
 
         # Display conversation history
         if st.session_state[qa_session_key]:
             st.subheader("Conversation History")
             for q, a, sources, log_id in reversed(st.session_state[qa_session_key]):
-                st.markdown(f"**Q:** {q}")
-                st.markdown(f"**A:** {a}")
-
-                col1, col2, _ = st.columns([1, 1, 10])
-                with col1:
-                    st.button("👍", key=f"up_{log_id}", on_click=update_feedback, args=(project_name, log_id, 1))
-                with col2:
-                    st.button("👎", key=f"down_{log_id}", on_click=update_feedback, args=(project_name, log_id, -1))
+                with st.chat_message("user"):
+                    st.markdown(q)
+                with st.chat_message("assistant"):
+                    st.markdown(a)
+                    col1, col2, _ = st.columns([1, 1, 10])
+                    with col1:
+                        st.button("👍", key=f"up_{log_id}", on_click=update_feedback, args=(project_name, log_id, 1))
+                    with col2:
+                        st.button("👎", key=f"down_{log_id}", on_click=update_feedback, args=(project_name, log_id, -1))
 
                 if sources:
                     with st.expander("View Sources"):
