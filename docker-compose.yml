@@ -31,6 +31,8 @@ services:
       # Test that the ollama server is running and responsive.
       test: ["CMD", "curl", "-f", "http://localhost:11434"]
       interval: 5s
+      # Give the container a 60-second grace period to start up and load the model.
+      start_period: 60s
       timeout: 3s
       retries: 5
     networks:
