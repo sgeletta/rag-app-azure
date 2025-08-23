@@ -19,7 +19,7 @@ services:
       - .env
 
   rag-app:
-    image: yourdockerhubuser/rag-app:latest
+    image: sgeletta/rag-app:latest
 
     container_name: rag-app
     ports:
