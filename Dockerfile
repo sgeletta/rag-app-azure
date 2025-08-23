@@ -20,4 +20,4 @@ EXPOSE 8501
 
 # Define the command to run the app.
 # The --server.address=0.0.0.0 flag makes the app accessible from outside the container.
-CMD ["streamlit", "run", "rag-app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+CMD ["streamlit", "run", "rag_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
