@@ -29,11 +29,11 @@ services:
       - ./ollama_data:/root/.ollama
     healthcheck:
       # Test that the ollama server is running and responsive.
-      test: ["CMD", "curl", "-f", "http://localhost:11434"]
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:11434"]
       interval: 5s
-      # Give the container a 60-second grace period to start up and load the model.
-      start_period: 60s
-      timeout: 3s
+      # Give the container a 3-minute grace period to start up and load the model.
+      start_period: 180s
+      timeout: 10s
       retries: 5
     networks:
       - rag-net
