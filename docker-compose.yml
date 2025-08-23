@@ -1,43 +1,38 @@
-services:
-  rag-app:
-    build: .
-    container_name: rag-app
-    ports:
-      - "8501:8501"
-    volumes:
-      - ./docs:/app/docs
-      - ./faiss_indexes:/app/faiss_indexes
-      - ./logs:/app/logs
-    environment:
-      # This allows the app to find the ollama service on the Docker network
-      - OLLAMA_BASE_URL=http://ollama:11434
-    depends_on:
-      ollama:
-        condition: service_healthy
-    networks:
-      - rag-net
+version: "3.8"
 
+services:
   ollama:
-    # Build a custom ollama image that includes the model
     build:
       context: .
       dockerfile: Dockerfile.ollama
-      args:
-        - MODEL=mistral # Specify the model to pre-load here
     container_name: ollama
-    volumes:
-      - ./ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
     healthcheck:
-      # Test that the ollama server is running and responsive.
-      test: ["CMD", "curl", "-f", "http://127.0.0.1:11434"]
-      interval: 5s
-      # Give the container a 3-minute grace period to start up and load the model.
-      start_period: 180s
+      test: ["CMD", "curl", "-f", "http://localhost:11434"]
+      interval: 30s
       timeout: 10s
       retries: 5
-    networks:
-      - rag-net
+    volumes:
+      - ollama_models:/root/.ollama/models
+    env_file:
+      - .env
 
-networks:
-  rag-net:
-    driver: bridge
+  rag-app:
+    image: yourdockerhubuser/rag-app:latest
+
+    container_name: rag-app
+    ports:
+      - "${STREAMLIT_SERVER_PORT:-8501}:8501"
+    depends_on:
+      ollama:
+        condition: service_healthy
+    volumes:
+      - ./uploaded_docs:/app/uploaded_docs
+      - ./vectorstore:/app/vectorstore
+      - ./logs:/app/logs
+    env_file:
+      - .env
+
+volumes:
+  ollama_models:

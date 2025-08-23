@@ -1,23 +1,22 @@
-# Use an official Python runtime as a parent image
+# Base image
 FROM python:3.11-slim
 
-# Set the working directory in the container
+# Set work directory
 WORKDIR /app
 
-# Copy the dependencies file to the working directory
-# This is done first to leverage Docker's layer caching
-COPY requirements.txt .
-
-# Install any needed packages specified in requirements.txt
-# Using --no-cache-dir reduces the image size
+# Install dependencies
+COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application's code to the working directory
+# Copy app source
 COPY . .
 
-# Expose the port Streamlit runs on
+# Set environment variables for Streamlit
+ENV PYTHONUNBUFFERED=1
+ENV STREAMLIT_SERVER_HEADLESS=true
+
+# Expose port
 EXPOSE 8501
 
-# Define the command to run the app.
-# The --server.address=0.0.0.0 flag makes the app accessible from outside the container.
-CMD ["streamlit", "run", "rag_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+# Run app
+CMD ["streamlit", "run", "rag_app.py"]
