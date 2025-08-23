@@ -1,8 +1,11 @@
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.env
-secrets.toml
-*.db
+# Git
+.git/
+.gitignore
+
+# Virtual environment
+.venv/
 venv/
+
+# IDE and editor files
+.idea/
+.vscode/

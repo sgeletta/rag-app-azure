@@ -380,24 +380,36 @@ def render_qa_interface(project_name, project_dir, db, selected_tag):
 
         if submitted and user_query:
             llm = get_llm()
-            retriever = db.as_retriever()
 
             # 1. Retrieve relevant documents
             with st.spinner("Searching for relevant documents..."):
-                source_documents = retriever.invoke(user_query)
+                # Use similarity search with a score threshold to filter irrelevant docs.
+                # FAISS returns a distance score (lower is better). We can filter out results with a high score.
+                # The threshold is empirical; you may need to adjust it based on your data and embedding model.
+                SIMILARITY_THRESHOLD = 1.2
+                retrieved_docs_with_scores = db.similarity_search_with_score(user_query, k=5)
+                source_documents = [doc for doc, score in retrieved_docs_with_scores if score < SIMILARITY_THRESHOLD]
+
+            # If no relevant documents are found after filtering, inform the user and stop.
+            if not source_documents:
+                st.warning("Could not find any relevant documents to answer your question. Please try rephrasing your query or check the uploaded documents.")
+                # We still log this attempt for analytics purposes
+                log_to_db(project_name, user_query, "No relevant documents found.", [], selected_tag)
+                return
 
             # 2. Prepare the context and prompt for the LLM
             context = "\n\n".join([doc.page_content for doc in source_documents])
             template = """
-            Use the following pieces of context to answer the question at the end.
-            If you don't know the answer, just say that you don't know, don't try to make up an answer.
-            Keep the answer concise.
+            You are an assistant for question-answering tasks.
+            Use ONLY the following pieces of retrieved context to answer the question.
+            If you don't know the answer from the context, just say that you don't know. Do not make up an answer.
+            Your answer must be based solely on the provided context.
 
             Context: {context}
 
             Question: {question}
 
-            Helpful Answer:
+            Answer:
             """
             prompt = PromptTemplate.from_template(template)
             llm_chain = LLMChain(llm=llm, prompt=prompt)
@@ -406,9 +418,17 @@ def render_qa_interface(project_name, project_dir, db, selected_tag):
             with st.chat_message("user"):
                 st.markdown(user_query)
             with st.chat_message("assistant"):
-                full_response = st.write_stream(llm_chain.stream({"context": context, "question": user_query}))
+                # Create a generator to extract the text from the streaming chunks
+                def stream_generator():
+                    for chunk in llm_chain.stream({"context": context, "question": user_query}):
+                        # LLMChain streams dictionaries, we need to extract the text
+                        yield chunk.get("text", "")
+
+                # st.write_stream consumes the generator and returns the final, full response
+                full_response = st.write_stream(stream_generator())
 
             # 4. Log the interaction and update session state
+            # Now full_response is a string and can be safely logged to the database.
             log_id = log_to_db(project_name, user_query, full_response, source_documents, selected_tag)
             st.session_state[qa_session_key].append((user_query, full_response, source_documents, log_id))
             st.rerun() # Rerun to display the new message in the history below
