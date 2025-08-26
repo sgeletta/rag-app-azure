@@ -2,14 +2,17 @@ streamlit
 pandas
 matplotlib
 seaborn
+
+# LangChain packages
 langchain
+langchain-core
 langchain-community
-langchain-ollama
-sentence-transformers
+langchain-huggingface
+langchain-text-splitters
+
+# Core RAG components
+ollama
 faiss-cpu
+sentence-transformers
 pdfplumber
-unstructured
-python-docx
-tiktoken
-openpyxl # Dependency for pandas/excel, good to have
-lxml # Dependency for some unstructured loaders
+unstructured[docx,md]

@@ -1,5 +1,10 @@
-# Use Ollama's base image
-FROM ollama/ollama:latest
+# Use the official Ollama base image
+FROM ollama/ollama
 
-# Port for inference API
-EXPOSE 11434
+# Update underlying OS packages to patch known security vulnerabilities.
+# This is a best practice for hardening Docker images.
+RUN apt-get update && apt-get upgrade -y --no-install-recommends && rm -rf /var/lib/apt/lists/*
+
+# Pre-pull the mistral model into the image during the build process.
+# This ensures the model is available immediately when the container starts.
+RUN ollama pull mistral

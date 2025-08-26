@@ -1,42 +1,45 @@
-# ---- Builder Stage ----
-# This stage installs the dependencies
-FROM python:3.11-slim as builder
+# Stage 1: Build stage to install dependencies
+FROM python:3.11-slim AS builder
 
-# Set work directory
+# Set working directory
 WORKDIR /app
 
-# Install dependencies
-COPY requirements.txt ./
-# Install dependencies to a user-specific directory
-RUN pip install --no-cache-dir --user -r requirements.txt
+# Install system dependencies that might be required by Python packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && apt-get upgrade -y \
+    && rm -rf /var/lib/apt/lists/*
 
-# ---- Final Stage ----
-# This stage builds the final, lean image
+# Copy only the requirements file to leverage Docker cache
+COPY requirements.txt .
+
+# Install dependencies using a virtual environment
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Stage 2: Final stage for the application
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Create a non-root user and group for security
-RUN addgroup --system app && adduser --system --ingroup app
+# It's crucial to upgrade packages in the final stage as well,
+# as this stage forms the basis of the final image.
+# We do this before creating the non-root user.
+RUN apt-get update && apt-get upgrade -y --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy installed packages from the builder stage
-COPY --from=builder /root/.local /home/app/.local
+# Create a non-root user for security
+RUN useradd --create-home appuser
+USER appuser
 
-# Copy app source
-COPY . /app
+# Copy the virtual environment from the builder stage
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-# Set ownership to the new user and switch to that user
-RUN chown -R app:app /app
-USER app
+# Copy the application code
+COPY --chown=appuser:appuser . .
 
-# Set environment variables for Streamlit
-# Update PATH to include the user's local bin directory
-ENV PATH="/home/app/.local/bin:${PATH}"
-ENV PYTHONUNBUFFERED=1
-ENV STREAMLIT_SERVER_HEADLESS=true
-
-# Expose port
+# Expose the Streamlit port and define the command to run the app
 EXPOSE 8501
-
-# Run app
-CMD ["streamlit", "run", "rag_app.py"]
+CMD ["streamlit", "run", "rag_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
