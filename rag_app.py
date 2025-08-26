@@ -8,9 +8,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 import streamlit as st
-from langchain.chains import LLMChain, RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_core.output_parsers import StrOutputParser
 from langchain_community.document_loaders import (
     CSVLoader,
     PDFPlumberLoader,
@@ -18,9 +18,8 @@ from langchain_community.document_loaders import (
     UnstructuredMarkdownLoader,
     UnstructuredWordDocumentLoader,
 )
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.llms import Ollama
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain_community.vectorstores import FAISS
 
 # --- Constants ---
@@ -71,10 +70,9 @@ def get_llm():
     """Loads the Ollama LLM and caches it."""
     # Check for the Docker-specific environment variable, otherwise use the default localhost.
     base_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
-    return Ollama(
-        model="mistral",
-        base_url=base_url,
-        callbacks=[StreamingStdOutCallbackHandler()])
+    # The `callbacks` parameter is deprecated. Callbacks are now configured on a per-call basis
+    # using .with_config(), but for basic streaming, LCEL's .stream() method is sufficient.
+    return Ollama(model="mistral", base_url=base_url)
 
 def load_document(path):
     """Loads a document from a file path based on its extension."""
@@ -109,6 +107,18 @@ def _migrate_log_db_schema(conn):
         # The calling function's CREATE TABLE IF NOT EXISTS will handle it.
         pass
 
+def get_db_connection(project_name):
+    """Context manager for handling SQLite database connections."""
+    db_path = os.path.join(LOG_DIR, f"query_log_{project_name}.db")
+    conn = sqlite3.connect(db_path)
+    try:
+        _migrate_log_db_schema(conn)
+        yield conn
+        conn.commit()
+    finally:
+        conn.close()
+
+
 def log_to_db(project_name, query, answer, source_documents, user_tag):
     db_path = os.path.join(LOG_DIR, f"query_log_{project_name}.db")
     conn = sqlite3.connect(db_path)
@@ -127,48 +137,54 @@ def log_to_db(project_name, query, answer, source_documents, user_tag):
                query,
                answer, ", ".join(doc_names)))
     log_id = c.lastrowid
-    conn.commit()
     conn.close()
     return log_id
 
 def update_feedback(project_name, log_id, feedback_value):
     """Updates the feedback for a specific log entry."""
-    db_path = os.path.join(LOG_DIR, f"query_log_{project_name}.db")
-    conn = sqlite3.connect(db_path)
-    _migrate_log_db_schema(conn)
-    c = conn.cursor()
-    # Using rowid to update is standard and efficient in SQLite
-    c.execute("UPDATE logs SET feedback = ? WHERE rowid = ?", (feedback_value, log_id))
-    conn.commit()
-    conn.close()
+    with get_db_connection(project_name) as conn:
+        c = conn.cursor()
+        # Using rowid to update is standard and efficient in SQLite
+        c.execute("UPDATE logs SET feedback = ? WHERE rowid = ?", (feedback_value, log_id))
+
+def _update_feedback_and_session(project_name, log_id, feedback_value, qa_session_key):
+    """Callback to update DB and session state for feedback."""
+    # 1. Update the persistent database
+    update_feedback(project_name, log_id, feedback_value)
+
+    # 2. Update the session state for immediate UI feedback
+    # Find the matching log entry in the session and update its feedback value
+    for i, item in enumerate(st.session_state[qa_session_key]):
+        # item is a tuple: (query, answer, sources, log_id, feedback_value)
+        if item[3] == log_id:
+            st.session_state[qa_session_key][i] = (item[0], item[1], item[2], item[3], feedback_value)
+            break
+
 
 def get_user_tags(project_name):
     """Gets a list of user tags, ordered by most recently used."""
     db_path = os.path.join(LOG_DIR, f"query_log_{project_name}.db")
     if not os.path.exists(db_path):
         return []
-    conn = sqlite3.connect(db_path)
     try:
+        with get_db_connection(project_name) as conn:
         # Order tags by the most recent timestamp for that tag
-        query = "SELECT user_tag FROM logs GROUP BY user_tag ORDER BY MAX(timestamp) DESC"
-        df = pd.read_sql_query(query, conn)
-        tags = df["user_tag"].tolist()
+            query = "SELECT user_tag FROM logs GROUP BY user_tag ORDER BY MAX(timestamp) DESC"
+            df = pd.read_sql_query(query, conn)
+            tags = df["user_tag"].tolist()
     except (pd.io.sql.DatabaseError, sqlite3.OperationalError):
         # Fallback for empty db or table not yet created
         tags = []
-    finally:
-        conn.close()
     return tags
 
 
 def get_session_summary(project_name):
-    db_path = os.path.join(LOG_DIR, f"query_log_{project_name}.db")
-    if not os.path.exists(db_path):
+    log_file = os.path.join(LOG_DIR, f"query_log_{project_name}.db")
+    if not os.path.exists(log_file):
         return pd.DataFrame()
-    conn = sqlite3.connect(db_path)
-    _migrate_log_db_schema(conn)
-    df = pd.read_sql_query("SELECT * FROM logs", conn)
-    conn.close()
+    with get_db_connection(project_name) as conn:
+        df = pd.read_sql_query("SELECT * FROM logs", conn)
+
     if df.empty:
         return pd.DataFrame()
     
@@ -188,12 +204,12 @@ def get_session_summary(project_name):
 
 
 def plot_session_timeline(project_name):
-    db_path = os.path.join(LOG_DIR, f"query_log_{project_name}.db")
-    if not os.path.exists(db_path):
+    log_file = os.path.join(LOG_DIR, f"query_log_{project_name}.db")
+    if not os.path.exists(log_file):
         return None
-    conn = sqlite3.connect(db_path)
-    df = pd.read_sql_query("SELECT timestamp, user_tag FROM logs", conn)
-    conn.close()
+    with get_db_connection(project_name) as conn:
+        df = pd.read_sql_query("SELECT timestamp, user_tag FROM logs", conn)
+
     if df.empty:
         return None
     df["timestamp"] = pd.to_datetime(df["timestamp"])
@@ -211,14 +227,13 @@ def plot_session_timeline(project_name):
 
 def plot_feedback_distribution(project_name):
     """Generates a bar chart showing feedback distribution by user tag."""
-    db_path = os.path.join(LOG_DIR, f"query_log_{project_name}.db")
-    if not os.path.exists(db_path):
+    log_file = os.path.join(LOG_DIR, f"query_log_{project_name}.db")
+    if not os.path.exists(log_file):
         return None
-    conn = sqlite3.connect(db_path)
-    _migrate_log_db_schema(conn)
-    # Select only logs that have received feedback
-    df = pd.read_sql_query("SELECT user_tag, feedback FROM logs WHERE feedback != 0", conn)
-    conn.close()
+    with get_db_connection(project_name) as conn:
+        # Select only logs that have received feedback
+        df = pd.read_sql_query("SELECT user_tag, feedback FROM logs WHERE feedback != 0", conn)
+
     if df.empty:
         return None
 
@@ -235,12 +250,12 @@ def plot_feedback_distribution(project_name):
 
 def plot_daily_query_counts(project_name):
     """Generates a faceted bar chart of daily query counts per user tag."""
-    db_path = os.path.join(LOG_DIR, f"query_log_{project_name}.db")
-    if not os.path.exists(db_path):
+    log_file = os.path.join(LOG_DIR, f"query_log_{project_name}.db")
+    if not os.path.exists(log_file):
         return None
-    conn = sqlite3.connect(db_path)
-    df = pd.read_sql_query("SELECT timestamp, user_tag FROM logs", conn)
-    conn.close()
+    with get_db_connection(project_name) as conn:
+        df = pd.read_sql_query("SELECT timestamp, user_tag FROM logs", conn)
+
     if df.empty:
         return None
 
@@ -412,40 +427,51 @@ def render_qa_interface(project_name, project_dir, db, selected_tag):
             Answer:
             """
             prompt = PromptTemplate.from_template(template)
-            llm_chain = LLMChain(llm=llm, prompt=prompt)
+            # Using LangChain Expression Language (LCEL) for a more modern and composable approach.
+            # This replaces the deprecated LLMChain. The StrOutputParser ensures the output is a string.
+            output_parser = StrOutputParser()
+            chain = prompt | llm | output_parser
 
             # 3. Stream the response to the UI and capture the full text
             with st.chat_message("user"):
                 st.markdown(user_query)
             with st.chat_message("assistant"):
-                # Create a generator to extract the text from the streaming chunks
-                def stream_generator():
-                    for chunk in llm_chain.stream({"context": context, "question": user_query}):
-                        # LLMChain streams dictionaries, we need to extract the text
-                        yield chunk.get("text", "")
-
-                # st.write_stream consumes the generator and returns the final, full response
-                full_response = st.write_stream(stream_generator())
+                # st.write_stream directly handles the generator from the LCEL chain.
+                # The LCEL chain with a StrOutputParser streams string chunks directly.
+                full_response = st.write_stream(chain.stream({"context": context, "question": user_query}))
 
             # 4. Log the interaction and update session state
             # Now full_response is a string and can be safely logged to the database.
             log_id = log_to_db(project_name, user_query, full_response, source_documents, selected_tag)
-            st.session_state[qa_session_key].append((user_query, full_response, source_documents, log_id))
+            # Append a tuple with an initial feedback state (0 for 'no feedback')
+            st.session_state[qa_session_key].append((user_query, full_response, source_documents, log_id, 0))
             st.rerun() # Rerun to display the new message in the history below
 
         # Display conversation history
         if st.session_state[qa_session_key]:
             st.subheader("Conversation History")
-            for q, a, sources, log_id in reversed(st.session_state[qa_session_key]):
+            # Unpack the new feedback value from the session state tuple
+            for q, a, sources, log_id, feedback in reversed(st.session_state[qa_session_key]):
                 with st.chat_message("user"):
                     st.markdown(q)
                 with st.chat_message("assistant"):
                     st.markdown(a)
+
+                    # Determine button state based on feedback value in session state
+                    is_upvoted = feedback == 1
+                    is_downvoted = feedback == -1
+
                     col1, col2, _ = st.columns([1, 1, 10])
                     with col1:
-                        st.button("👍", key=f"up_{log_id}", on_click=update_feedback, args=(project_name, log_id, 1))
+                        st.button("👍", key=f"up_{log_id}",
+                                  on_click=_update_feedback_and_session,
+                                  args=(project_name, log_id, 1, qa_session_key),
+                                  disabled=is_upvoted)
                     with col2:
-                        st.button("👎", key=f"down_{log_id}", on_click=update_feedback, args=(project_name, log_id, -1))
+                        st.button("👎", key=f"down_{log_id}",
+                                  on_click=_update_feedback_and_session,
+                                  args=(project_name, log_id, -1, qa_session_key),
+                                  disabled=is_downvoted)
 
                 if sources:
                     with st.expander("View Sources"):
@@ -462,9 +488,8 @@ def render_log_reports(project_name, log_filter_tag):
     st.header("🧾 Query Logs")
     db_file = os.path.join(LOG_DIR, f"query_log_{project_name}.db")
     if os.path.exists(db_file):
-        conn = sqlite3.connect(db_file)
-        df = pd.read_sql_query("SELECT * FROM logs", conn)
-        conn.close()
+        with get_db_connection(project_name) as conn:
+            df = pd.read_sql_query("SELECT * FROM logs", conn)
 
         if not df.empty:            
             df_to_display = df.copy()
