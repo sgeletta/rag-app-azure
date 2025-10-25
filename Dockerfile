@@ -16,7 +16,11 @@ COPY requirements.pinned.txt .
 # Install dependencies using a virtual environment
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
-RUN pip install --no-cache-dir -r requirements.pinned.txt
+
+# Install the CPU-only version of torch first to avoid GPU dependency issues.
+# Then, install the rest of the packages. pip will skip torch as it's already installed.
+RUN pip install torch --index-url https://download.pytorch.org/whl/cpu && \
+    pip install --no-cache-dir -r requirements.pinned.txt
 
 # Stage 2: Final stage for the application
 FROM python:3.11-slim-bookworm

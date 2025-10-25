@@ -554,7 +554,6 @@ def render_analytics_dashboard(project_name):
 
 # --- Main Application ---
 def main():
-    st.set_page_config(layout="wide", page_title="Document Q&A with RAG")
     st.sidebar.title("⚙️ Setup & Navigation")
 
     # --- Project and Session Setup ---
@@ -634,6 +633,9 @@ def main():
 
 # --- Entry Point ---
 if __name__ == "__main__":
+    # Set page config as the very first Streamlit command.
+    st.set_page_config(layout="wide", page_title="Document Q&A with RAG")
+
     if authenticate_user():
         st.sidebar.success(f"Logged in as: {st.session_state['username']}")
         if st.sidebar.button("Logout"):

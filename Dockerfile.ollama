@@ -5,6 +5,7 @@ FROM ollama/ollama
 # This is a best practice for hardening Docker images.
 RUN apt-get update && apt-get upgrade -y --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
-# Pre-pull the mistral model into the image during the build process.
-# This ensures the model is available immediately when the container starts.
-RUN ollama pull mistral
+# Copy the entrypoint script and set it to run on container start
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+CMD ["/entrypoint.sh"]

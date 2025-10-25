@@ -1,0 +1,153 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "environment_name": {
+            "type": "string",
+            "defaultValue": "rag-app-env"
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "eastus"
+        },
+        "acr_name": {
+            "type": "string",
+            "defaultValue": "ragappacr9626"
+        },
+        "storage_account_name": {
+            "type": "string"
+        },
+        "storage_account_key": {
+            "type": "securestring"
+        },
+        "acr_admin_password": {
+            "type": "securestring"
+        }
+    },
+    "resources": [
+        {
+            "name": "ollama-app",
+            "type": "Microsoft.App/containerApps",
+            "apiVersion": "2022-11-01-preview",
+            "kind": "containerapp",
+            "location": "[parameters('location')]",
+            "properties": {
+                "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environment_name'))]",
+                "configuration": {
+                    "secrets": [
+                        {
+                            "name": "storage-account-key",
+                            "value": "[parameters('storage_account_key')]"
+                        },
+                        {
+                            "name": "acr-password",
+                            "value": "[parameters('acr_admin_password')]"
+                        }
+                    ],
+                    "ingress": {
+                        "external": false,
+                        "targetPort": 11434,
+                        "transport": "http"
+                    },
+                    "registries": [
+                        {
+                            "server": "[concat(parameters('acr_name'), '.azurecr.io')]",
+                            "username": "[parameters('acr_name')]",
+                            "passwordSecretRef": "acr-password"
+                        }
+                    ]
+                },
+                "template": {
+                    "containers": [
+                        {
+                            "image": "[concat(parameters('acr_name'), '.azurecr.io/rag-app-ollama:latest')]",
+                            "name": "ollama-app",
+                            "resources": {
+                                "cpu": 2.0,
+                                "memory": "4.0Gi"
+                            },
+                            "volumeMounts": [
+                                {
+                                    "mountPath": "/root/.ollama",
+                                    "volumeName": "ollama-data-volume"
+                                }
+                            ]
+                        }
+                    ],
+                    "volumes": [
+                        {
+                            "name": "ollama-data-volume",
+                            "storageType": "AzureFile",
+                            "storageName": "ragappstorage"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "name": "rag-app",
+            "type": "Microsoft.App/containerApps",
+            "apiVersion": "2022-11-01-preview",
+            "kind": "containerapp",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.App/containerApps', 'ollama-app')]"
+            ],
+            "properties": {
+                "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environment_name'))]",
+                "configuration": {
+                    "secrets": [
+                        {
+                            "name": "storage-account-key",
+                            "value": "[parameters('storage_account_key')]"
+                        },
+                        {
+                            "name": "acr-password",
+                            "value": "[parameters('acr_admin_password')]"
+                        }
+                    ],
+                    "ingress": {
+                        "external": true,
+                        "targetPort": 8501,
+                        "transport": "http"
+                    },
+                    "registries": [
+                        {
+                            "server": "[concat(parameters('acr_name'), '.azurecr.io')]",
+                            "username": "[parameters('acr_name')]",
+                            "passwordSecretRef": "acr-password"
+                        }
+                    ]
+                },
+                "template": {
+                    "containers": [
+                        {
+                            "image": "[concat(parameters('acr_name'), '.azurecr.io/rag-app:latest')]",
+                            "name": "rag-app",
+                            "env": [
+                                {
+                                    "name": "OLLAMA_BASE_URL",
+                                    "value": "http://ollama-app:11434"
+                                }
+                            ],
+                            "resources": {
+                                "cpu": 1.0,
+                                "memory": "2.0Gi"
+                            },
+                            "volumeMounts": [
+                                { "mountPath": "/app/docs", "volumeName": "docs-volume" },
+                                { "mountPath": "/app/faiss_indexes", "volumeName": "faiss-indexes-volume" },
+                                { "mountPath": "/app/logs", "volumeName": "logs-volume" }
+                            ]
+                        }
+                    ],
+                    "volumes": [
+                        { "name": "docs-volume", "storageType": "AzureFile", "storageName": "ragappstorage" },
+                        { "name": "faiss-indexes-volume", "storageType": "AzureFile", "storageName": "ragappstorage" },
+                        { "name": "logs-volume", "storageType": "AzureFile", "storageName": "ragappstorage" }
+                    ]
+                }
+            }
+        }
+    ]
+}
