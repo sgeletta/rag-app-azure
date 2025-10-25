@@ -11,12 +11,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy only the requirements file to leverage Docker cache
-COPY requirements.txt .
+COPY requirements.pinned.txt .
 
 # Install dependencies using a virtual environment
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.pinned.txt
 
 # Stage 2: Final stage for the application
 FROM python:3.11-slim-bookworm
