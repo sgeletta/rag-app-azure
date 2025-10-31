@@ -44,19 +44,16 @@ Inside your new project folder, create the following sub-directories. These will
 - `docs`
 - `faiss_indexes`
 - `logs`
-- `.streamlit`
 
-**Step 3: Create a Secrets File for Authentication**
+**Step 3: Create an Environment File for Authentication**
 
-This application uses a secrets file to manage login credentials. Inside the `.streamlit` directory you just created, create a new file named `secrets.toml` and paste the following content into it.
+This application uses an environment file to manage local login credentials. In the root of your project folder, create a new file named `.env` and paste the following content into it.
 
-```toml
-# This file configures the login credentials for the application.
-# You can add multiple users by duplicating the [credentials.usernames.user] block.
-[credentials]
-usernames = {
-  "admin" = {name="Admin User", password="changeme"}
-}
+```
+# This file configures the login credentials for the local application.
+# These variables are loaded by docker-compose.yml.
+RAG_APP_USERNAME=admin
+RAG_APP_PASSWORD=changeme
 ```
 > **Important**: Be sure to change the default password `changeme` to a strong, secure password of your choice.
 

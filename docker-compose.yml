@@ -10,9 +10,13 @@ services:
       - ./docs:/app/docs
       - ./faiss_indexes:/app/faiss_indexes
       - ./logs:/app/logs
+      # The .streamlit volume is no longer needed for secrets.
+      # - ./.streamlit:/app/.streamlit
     environment:
       # This tells the app to communicate with the ollama service
       - OLLAMA_BASE_URL=http://ollama:11434
+      - RAG_APP_USERNAME=${RAG_APP_USERNAME}
+      - RAG_APP_PASSWORD=${RAG_APP_PASSWORD}
     depends_on:
       - ollama
     restart: unless-stopped

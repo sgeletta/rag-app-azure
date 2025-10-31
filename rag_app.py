@@ -39,19 +39,21 @@ def authenticate_user():
             password = st.text_input("Password", type="password")
             submitted = st.form_submit_button("Login")
             if submitted:                
-                try:
-                    # Check if the provided username exists and the password matches.
-                    if username in st.secrets["users"] and st.secrets["users"][username] == password:
-                        st.session_state["authenticated"] = True
-                        st.session_state["username"] = username
-                        st.rerun()
-                    else:
-                        st.error("Invalid username or password.")
-                except (KeyError, AttributeError):
+                # Retrieve credentials from environment variables
+                configured_username = os.environ.get("RAG_APP_USERNAME")
+                configured_password = os.environ.get("RAG_APP_PASSWORD")
+
+                if not configured_username or not configured_password:
                     st.error(
-                        "User authentication is not configured. "
-                        "Please ensure a `.streamlit/secrets.toml` file exists with user credentials."
+                        "Authentication credentials (RAG_APP_USERNAME, RAG_APP_PASSWORD) "
+                        "are not configured in the environment. Please contact your administrator."
                     )
+                elif username == configured_username and password == configured_password:
+                    st.session_state["authenticated"] = True
+                    st.session_state["username"] = username
+                    st.rerun()
+                else:
+                    st.error("Invalid username or password.")
         return False
     return True
 

@@ -33,16 +33,16 @@ WORKDIR /app
 RUN apt-get update && apt-get upgrade -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-# Create a non-root user for security
-RUN useradd --create-home appuser
-USER appuser
-
 # Copy the virtual environment from the builder stage
 COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy the application code
-COPY --chown=appuser:appuser . .
+COPY . .
+
+# Create a non-root user and change ownership of the app directory
+RUN useradd --create-home appuser && chown -R appuser:appuser /app
+USER appuser
 
 # Expose the Streamlit port and define the command to run the app
 EXPOSE 8501

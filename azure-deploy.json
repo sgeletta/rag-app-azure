@@ -22,6 +22,14 @@
         },
         "acr_admin_password": {
             "type": "securestring"
+        },
+        "rag_app_username": {
+            "type": "string",
+            "defaultValue": "admin"
+        },
+        "rag_app_password": {
+            "type": "securestring",
+            "metadata": { "description": "Password for the RAG application UI." }
         }
     },
     "resources": [
@@ -104,6 +112,14 @@
                         {
                             "name": "acr-password",
                             "value": "[parameters('acr_admin_password')]"
+                        },
+                        {
+                            "name": "rag-app-username",
+                            "value": "[parameters('rag_app_username')]"
+                        },
+                        {
+                            "name": "rag-app-password",
+                            "value": "[parameters('rag_app_password')]"
                         }
                     ],
                     "ingress": {
@@ -128,6 +144,14 @@
                                 {
                                     "name": "OLLAMA_BASE_URL",
                                     "value": "http://ollama-app:11434"
+                                },
+                                {
+                                    "name": "RAG_APP_USERNAME",
+                                    "secretRef": "rag-app-username"
+                                },
+                                {
+                                    "name": "RAG_APP_PASSWORD",
+                                    "secretRef": "rag-app-password"
                                 }
                             ],
                             "resources": {
