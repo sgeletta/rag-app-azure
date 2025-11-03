@@ -33,27 +33,30 @@ def authenticate_user():
         st.session_state["authenticated"] = False
 
     if not st.session_state["authenticated"]:
-        with st.form("login_form"):
-            st.subheader("🔐 Login Required")
-            username = st.text_input("Username")
-            password = st.text_input("Password", type="password")
-            submitted = st.form_submit_button("Login")
-            if submitted:                
-                # Retrieve credentials from environment variables
-                configured_username = os.environ.get("RAG_APP_USERNAME")
-                configured_password = os.environ.get("RAG_APP_PASSWORD")
+        # Use columns to create a centered, narrower login form for a better UI look.
+        _col1, col2, _col3 = st.columns([1, 1.5, 1])
+        with col2:
+            with st.form("login_form"):
+                st.subheader("🔐 Login Required")
+                username = st.text_input("Username")
+                password = st.text_input("Password", type="password")
+                submitted = st.form_submit_button("Login")
+                if submitted:
+                    # Retrieve credentials from environment variables
+                    configured_username = os.environ.get("RAG_APP_USERNAME")
+                    configured_password = os.environ.get("RAG_APP_PASSWORD")
 
-                if not configured_username or not configured_password:
-                    st.error(
-                        "Authentication credentials (RAG_APP_USERNAME, RAG_APP_PASSWORD) "
-                        "are not configured in the environment. Please contact your administrator."
-                    )
-                elif username == configured_username and password == configured_password:
-                    st.session_state["authenticated"] = True
-                    st.session_state["username"] = username
-                    st.rerun()
-                else:
-                    st.error("Invalid username or password.")
+                    if not configured_username or not configured_password:
+                        st.error(
+                            "Authentication credentials (RAG_APP_USERNAME, RAG_APP_PASSWORD) "
+                            "are not configured in the environment. Please contact your administrator."
+                        )
+                    elif username == configured_username and password == configured_password:
+                        st.session_state["authenticated"] = True
+                        st.session_state["username"] = username
+                        st.rerun()
+                    else:
+                        st.error("Invalid username or password.")
         return False
     return True
 
