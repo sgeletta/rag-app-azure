@@ -1,7 +1,7 @@
 # This GitHub Actions workflow will automatically build your Docker image
 # and push it to Docker Hub whenever you push a change to the 'main' branch.
 
-name: Publish Docker Image to Docker Hub
+name: Publish Docker Image to Public Repository
 
 on:
   push:
@@ -34,9 +34,5 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/rag-app:latest
-          # This is the core step:
-          # - 'context: .' tells it to use your project's root directory.
-          # - 'file: ./Dockerfile' points to your application's Dockerfile.
-          # - 'push: true' tells it to push the image after a successful build.
-          # - 'tags:' defines the name and tag for your image on Docker Hub.
-          #   Example: "sgeletta/rag-app:latest"
+          # This step builds the image and pushes it to Docker Hub.
+          # The tag format is 'username/repository:tag'.
