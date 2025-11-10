@@ -19,7 +19,7 @@ The entire application and its dependencies are managed through Docker, making i
 
 Before you begin, you will need to have the following software installed on your workstation.
 
-**Docker & Docker Compose**: The application runs in Docker containers. The easiest way to get both is by installing [Docker Desktop](https://www.docker.com/products/docker-desktop/) for your operating system (Windows, macOS, or Linux).
+**Docker & Docker Compose**: The application runs in Docker containers. The easiest way to get both is by installing [Docker Desktop](https://www.docker.com/products/docker-desktop/) for your operating system which could be either of Windows, macOS, or Linux.
 
 ---
 
