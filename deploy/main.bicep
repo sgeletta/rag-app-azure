@@ -18,6 +18,12 @@ param ragAppUsername string
 @minLength(8)
 param ragAppPassword string
 
+@description('A flag to control whether the container apps should be deployed. Used for two-stage deployment.')
+param deployApps bool = true
+
+@description('The unique tag for the Docker images to be deployed.')
+param imageTag string = 'latest' // Default to 'latest' for safety, but script will override.
+
 // Variables for resource naming
 var logAnalyticsWorkspaceName = '${resourcePrefix}-logs'
 var vnetName = '${resourcePrefix}-vnet'
@@ -28,10 +34,10 @@ var storageAccountName = '${resourcePrefix}storage'
 var fileShareName = 'ragappdata'
 var containerAppsEnvName = '${resourcePrefix}-cae'
 var ollamaAppName = '${resourcePrefix}-ollama-app'
-var ollamaImage = '${acrName}.azurecr.io/rag-app-ollama:latest'
+var ollamaImage = '${acrName}.azurecr.io/rag-app-ollama:${imageTag}'
 var ragAppName = '${resourcePrefix}-rag-app'
-var ragAppImage = '${acrName}.azurecr.io/rag-app:latest'
-
+var ragAppImage = '${acrName}.azurecr.io/rag-app:${imageTag}'
+// This variable safely resolves the OLLAMA_BASE_URL, avoiding the BCP318 warning.
 
 /*
   RESOURCE DEFINITIONS
@@ -123,7 +129,7 @@ resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2023-05-01'
   properties: {
     // This makes the environment internal, meaning apps are only accessible from inside the VNet.
     vnetConfiguration: {
-      internal: true
+      internal: false // Change to false for public access to rag-app
       infrastructureSubnetId: virtualNetwork.properties.subnets[0].id // Reference the 'cae-subnet'
     }
     // Link to the Log Analytics workspace for logging and monitoring.
@@ -148,15 +154,19 @@ resource environmentStorage 'Microsoft.App/managedEnvironments/storages@2023-05-
       shareName: fileShareName
       accountName: storageAccountName
       accountKey: storageAccount.listKeys().keys[0].value
+      accessMode: 'ReadWrite'
     }
   }
 }
 
 // 6. Ollama Container App
 // This app runs the Ollama service. It's internal and uses a file share for model persistence.
-resource ollamaApp 'Microsoft.App/containerApps@2023-05-01' = {
+resource ollamaApp 'Microsoft.App/containerApps@2023-05-01' = if (deployApps) {
   name: ollamaAppName
   location: location
+  dependsOn: [
+    environmentStorage
+  ]
   properties: {
     managedEnvironmentId: containerAppsEnvironment.id
     template: {
@@ -174,6 +184,44 @@ resource ollamaApp 'Microsoft.App/containerApps@2023-05-01' = {
             {
               volumeName: 'ollama-data-volume'
               mountPath: '/root/.ollama'
+            }
+          ]
+          // --- FIX: Use a patient startup probe to allow for long model download times ---
+          probes: [
+            // Startup probe: Gives the container up to 16 minutes to start before being killed.
+            // Total timeout = initialDelaySeconds + (periodSeconds * failureThreshold)
+            // 60s + (30s * 30) = 960s = 16 minutes
+            {
+              type: 'startup'
+              httpGet: {
+                path: '/'
+                port: 11434
+              }
+              initialDelaySeconds: 60
+              periodSeconds: 30
+              failureThreshold: 30
+            }
+            // Liveness probe: Once started, checks if the app is still running.
+            // If this fails, the container is restarted.
+            {
+              type: 'liveness'
+              httpGet: {
+                path: '/'
+                port: 11434
+              }
+              initialDelaySeconds: 60
+              periodSeconds: 30
+            }
+            // Readiness probe: Once started, checks if the app is ready to accept traffic.
+            // If this fails, the container is removed from the load balancer.
+            {
+              type: 'readiness'
+              httpGet: {
+                path: '/'
+                port: 11434
+              }
+              initialDelaySeconds: 60
+              periodSeconds: 30
             }
           ]
         }
@@ -204,6 +252,7 @@ resource ollamaApp 'Microsoft.App/containerApps@2023-05-01' = {
       ]
       // Allow the app to be reached from other apps in the environment
       ingress: {
+        external: false // To make an app internal, the 'external' property must be set to false.
         targetPort: 11434
         transport: 'http'
         // Because the environment is internal, this ingress is also internal.
@@ -221,75 +270,23 @@ resource ollamaApp 'Microsoft.App/containerApps@2023-05-01' = {
   }
 }
 
-// 7. RAG App (Frontend)
-// This is the main Streamlit application that users will interact with.
-resource ragApp 'Microsoft.App/containerApps@2023-05-01' = {
-  name: ragAppName
-  location: location
-  properties: {
-    managedEnvironmentId: containerAppsEnvironment.id
-    template: {
-      containers: [
-        {
-          name: 'rag-app'
-          image: ragAppImage
-          resources: {
-            cpu: 1
-            memory: '2.0Gi'
-          }
-          // Set environment variables for the application
-          env: [
-            {
-              name: 'RAG_APP_USERNAME'
-              secretRef: 'rag-app-username' // Reference to a secret defined below
-            }
-            {
-              name: 'RAG_APP_PASSWORD'
-              secretRef: 'rag-app-password' // Reference to a secret defined below
-            }
-            {
-              name: 'OLLAMA_BASE_URL'
-              // Use the internal FQDN of the ollama-app
-              value: 'http://${ollamaApp.properties.configuration.ingress.fqdn}:${ollamaApp.properties.configuration.ingress.targetPort}'
-            }
-          ]
-        }
-      ]
-      scale: {
-        minReplicas: 1
-        maxReplicas: 1
-      }
-    }
-    configuration: {
-      secrets: [
-        {
-          name: 'rag-app-username'
-          value: ragAppUsername
-        }
-        {
-          name: 'rag-app-password'
-          value: ragAppPassword
-        }
-        {
-          name: 'acr-password'
-          // Use the same secret value for the ACR password.
-          value: containerRegistry.listCredentials().passwords[0].value
-        }
-      ]
-      ingress: {
-        external: true // Make this app accessible from the public internet
-        targetPort: 8501
-        transport: 'http'
-        allowInsecure: true // Allow HTTP traffic, since we're not setting up a custom domain/cert
-      }
-      // Allow the app to pull images from our ACR
-      registries: [
-        {
-          server: containerRegistry.properties.loginServer
-          username: containerRegistry.name
-          passwordSecretRef: 'acr-password'
-        }
-      ]
-    }
+// 7. RAG App Module
+// Conditionally deploy the RAG frontend app using a separate module.
+// This completely isolates the resource and its dependencies, resolving the BCP318 warning.
+module ragAppModule 'ragApp.bicep' = if (deployApps) {
+  name: 'ragAppDeployment'
+  params: {
+    location: location
+    ragAppName: ragAppName
+    containerAppsEnvironmentId: containerAppsEnvironment.id
+    ragAppImage: ragAppImage
+    ragAppUsername: ragAppUsername
+    ragAppPassword: ragAppPassword
+    acrLoginServer: containerRegistry.properties.loginServer
+    acrUsername: containerRegistry.name
+    acrPassword: containerRegistry.listCredentials().passwords[0].value
+    // The URL is constructed here, safely inside the conditional deployment block for the module.
+    // For internal service discovery, only the FQDN is needed. The port is resolved automatically.
+    ollamaBaseUrl: 'http://${ollamaApp!.properties.configuration.ingress.fqdn}'
   }
 }

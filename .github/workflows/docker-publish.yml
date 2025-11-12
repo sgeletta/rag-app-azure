@@ -4,6 +4,7 @@
 name: Publish Docker Image to Public Repository
 
 on:
+  workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
   push:
     branches: [ "main" ] # This workflow runs on pushes to the main branch
 
@@ -35,4 +36,14 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/rag-app:latest
           # This step builds the image and pushes it to Docker Hub.
+
+      - name: Build and push Ollama Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.ollama
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/rag-app-ollama:latest
+          # This step builds the ollama image and pushes it to Docker Hub.
+          # The tag format is 'username/repository:tag'.
           # The tag format is 'username/repository:tag'.

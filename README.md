@@ -1,4 +1,4 @@
-# Local RAG Application with Ollama and Streamlit
+# Local RAG Application with Ollama and Streamlit (Pub)
 
 This project provides a fully containerized, local-first Retrieval-Augmented Generation (RAG) application. It uses Streamlit for the user interface, Ollama to run local language models like Mistral, and FAISS for efficient document searching.
 

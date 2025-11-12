@@ -1,0 +1,465 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.38.33.27573",
+      "templateHash": "9993458057019471138"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "The location where all resources should be created."
+      }
+    },
+    "resourcePrefix": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 10,
+      "metadata": {
+        "description": "A prefix that will be used to name all the Azure resources."
+      }
+    },
+    "vnetAddressPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/16",
+      "metadata": {
+        "description": "The address space for the new Virtual Network."
+      }
+    },
+    "ragAppUsername": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The username for the RAG application login."
+      }
+    },
+    "ragAppPassword": {
+      "type": "securestring",
+      "minLength": 8,
+      "metadata": {
+        "description": "The password for the RAG application login. It must be at least 8 characters long."
+      }
+    },
+    "deployApps": {
+      "type": "bool",
+      "defaultValue": true,
+      "metadata": {
+        "description": "A flag to control whether the container apps should be deployed. Used for two-stage deployment."
+      }
+    }
+  },
+  "variables": {
+    "logAnalyticsWorkspaceName": "[format('{0}-logs', parameters('resourcePrefix'))]",
+    "vnetName": "[format('{0}-vnet', parameters('resourcePrefix'))]",
+    "containerAppsEnvSubnetName": "cae-subnet",
+    "otherSubnetName": "default-subnet",
+    "acrName": "[format('{0}acr', parameters('resourcePrefix'))]",
+    "storageAccountName": "[format('{0}storage', parameters('resourcePrefix'))]",
+    "fileShareName": "ragappdata",
+    "containerAppsEnvName": "[format('{0}-cae', parameters('resourcePrefix'))]",
+    "ollamaAppName": "[format('{0}-ollama-app', parameters('resourcePrefix'))]",
+    "ollamaImage": "[format('{0}.azurecr.io/rag-app-ollama:latest', variables('acrName'))]",
+    "ragAppName": "[format('{0}-rag-app', parameters('resourcePrefix'))]",
+    "ragAppImage": "[format('{0}.azurecr.io/rag-app:latest', variables('acrName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2022-10-01",
+      "name": "[variables('logAnalyticsWorkspaceName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "sku": {
+          "name": "PerGB2018"
+        },
+        "retentionInDays": 30
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2023-05-01",
+      "name": "[variables('vnetName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('vnetAddressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('containerAppsEnvSubnetName')]",
+            "properties": {
+              "addressPrefix": "10.0.0.0/23"
+            }
+          },
+          {
+            "name": "[variables('otherSubnetName')]",
+            "properties": {
+              "addressPrefix": "10.0.2.0/24"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.ContainerRegistry/registries",
+      "apiVersion": "2023-01-01-preview",
+      "name": "[variables('acrName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Basic"
+      },
+      "properties": {
+        "adminUserEnabled": true
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2022-09-01",
+      "name": "[variables('storageAccountName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "StorageV2"
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+      "apiVersion": "2022-09-01",
+      "name": "[format('{0}/{1}/{2}', variables('storageAccountName'), 'default', variables('fileShareName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.App/managedEnvironments",
+      "apiVersion": "2023-05-01",
+      "name": "[variables('containerAppsEnvName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "vnetConfiguration": {
+          "internal": true,
+          "infrastructureSubnetId": "[reference(resourceId('Microsoft.Network/virtualNetworks', variables('vnetName')), '2023-05-01').subnets[0].id]"
+        },
+        "appLogsConfiguration": {
+          "destination": "log-analytics",
+          "logAnalyticsConfiguration": {
+            "customerId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsWorkspaceName')), '2022-10-01').customerId]",
+            "sharedKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsWorkspaceName')), '2022-10-01').primarySharedKey]"
+          }
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsWorkspaceName'))]",
+        "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.App/managedEnvironments/storages",
+      "apiVersion": "2023-05-01",
+      "name": "[format('{0}/{1}', variables('containerAppsEnvName'), 'ollama-storage')]",
+      "properties": {
+        "azureFile": {
+          "shareName": "[variables('fileShareName')]",
+          "accountName": "[variables('storageAccountName')]",
+          "accountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-09-01').keys[0].value]",
+          "accessMode": "ReadWrite"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.App/managedEnvironments', variables('containerAppsEnvName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ]
+    },
+    {
+      "condition": "[parameters('deployApps')]",
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2023-05-01",
+      "name": "[variables('ollamaAppName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', variables('containerAppsEnvName'))]",
+        "template": {
+          "containers": [
+            {
+              "name": "ollama",
+              "image": "[variables('ollamaImage')]",
+              "resources": {
+                "cpu": 2,
+                "memory": "4.0Gi"
+              },
+              "volumeMounts": [
+                {
+                  "volumeName": "ollama-data-volume",
+                  "mountPath": "/root/.ollama"
+                }
+              ],
+              "probes": [
+                {
+                  "type": "startup",
+                  "httpGet": {
+                    "path": "/",
+                    "port": 11434
+                  },
+                  "initialDelaySeconds": 60,
+                  "periodSeconds": 30,
+                  "failureThreshold": 30
+                },
+                {
+                  "type": "liveness",
+                  "httpGet": {
+                    "path": "/",
+                    "port": 11434
+                  },
+                  "initialDelaySeconds": 60,
+                  "periodSeconds": 30
+                },
+                {
+                  "type": "readiness",
+                  "httpGet": {
+                    "path": "/",
+                    "port": 11434
+                  },
+                  "initialDelaySeconds": 60,
+                  "periodSeconds": 30
+                }
+              ]
+            }
+          ],
+          "scale": {
+            "minReplicas": 1,
+            "maxReplicas": 1
+          },
+          "volumes": [
+            {
+              "name": "ollama-data-volume",
+              "storageType": "AzureFile",
+              "storageName": "ollama-storage"
+            }
+          ]
+        },
+        "configuration": {
+          "registries": [
+            {
+              "server": "[reference(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2023-01-01-preview').loginServer]",
+              "username": "[variables('acrName')]",
+              "passwordSecretRef": "acr-password"
+            }
+          ],
+          "ingress": {
+            "targetPort": 11434,
+            "transport": "http"
+          },
+          "secrets": [
+            {
+              "name": "acr-password",
+              "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2023-01-01-preview').passwords[0].value]"
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.App/managedEnvironments', variables('containerAppsEnvName'))]",
+        "[resourceId('Microsoft.ContainerRegistry/registries', variables('acrName'))]",
+        "[resourceId('Microsoft.App/managedEnvironments/storages', variables('containerAppsEnvName'), 'ollama-storage')]"
+      ]
+    },
+    {
+      "condition": "[parameters('deployApps')]",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "ragAppDeployment",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "ragAppName": {
+            "value": "[variables('ragAppName')]"
+          },
+          "containerAppsEnvironmentId": {
+            "value": "[resourceId('Microsoft.App/managedEnvironments', variables('containerAppsEnvName'))]"
+          },
+          "ragAppImage": {
+            "value": "[variables('ragAppImage')]"
+          },
+          "ragAppUsername": {
+            "value": "[parameters('ragAppUsername')]"
+          },
+          "ragAppPassword": {
+            "value": "[parameters('ragAppPassword')]"
+          },
+          "acrLoginServer": {
+            "value": "[reference(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2023-01-01-preview').loginServer]"
+          },
+          "acrUsername": {
+            "value": "[variables('acrName')]"
+          },
+          "acrPassword": {
+            "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2023-01-01-preview').passwords[0].value]"
+          },
+          "ollamaBaseUrl": {
+            "value": "[format('http://{0}:{1}', reference(resourceId('Microsoft.App/containerApps', variables('ollamaAppName')), '2023-05-01').configuration.ingress.fqdn, reference(resourceId('Microsoft.App/containerApps', variables('ollamaAppName')), '2023-05-01').configuration.ingress.targetPort)]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.38.33.27573",
+              "templateHash": "16357186585518296950"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "The location for the resource."
+              }
+            },
+            "ragAppName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the RAG application."
+              }
+            },
+            "containerAppsEnvironmentId": {
+              "type": "string",
+              "metadata": {
+                "description": "The resource ID of the parent Container Apps Environment."
+              }
+            },
+            "ragAppImage": {
+              "type": "string",
+              "metadata": {
+                "description": "The Docker image for the RAG application."
+              }
+            },
+            "ragAppUsername": {
+              "type": "securestring",
+              "metadata": {
+                "description": "The username for the application UI."
+              }
+            },
+            "ragAppPassword": {
+              "type": "securestring",
+              "metadata": {
+                "description": "The password for the application UI."
+              }
+            },
+            "acrLoginServer": {
+              "type": "string",
+              "metadata": {
+                "description": "The login server for the Azure Container Registry."
+              }
+            },
+            "acrUsername": {
+              "type": "string",
+              "metadata": {
+                "description": "The username for the Azure Container Registry."
+              }
+            },
+            "acrPassword": {
+              "type": "securestring",
+              "metadata": {
+                "description": "The admin password for the Azure Container Registry."
+              }
+            },
+            "ollamaBaseUrl": {
+              "type": "string",
+              "metadata": {
+                "description": "The fully qualified base URL for the internal Ollama service."
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.App/containerApps",
+              "apiVersion": "2023-05-01",
+              "name": "[parameters('ragAppName')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "managedEnvironmentId": "[parameters('containerAppsEnvironmentId')]",
+                "template": {
+                  "containers": [
+                    {
+                      "name": "rag-app",
+                      "image": "[parameters('ragAppImage')]",
+                      "resources": {
+                        "cpu": 1,
+                        "memory": "2.0Gi"
+                      },
+                      "env": [
+                        {
+                          "name": "RAG_APP_USERNAME",
+                          "secretRef": "rag-app-username"
+                        },
+                        {
+                          "name": "RAG_APP_PASSWORD",
+                          "secretRef": "rag-app-password"
+                        },
+                        {
+                          "name": "OLLAMA_BASE_URL",
+                          "value": "[parameters('ollamaBaseUrl')]"
+                        }
+                      ]
+                    }
+                  ],
+                  "scale": {
+                    "minReplicas": 1,
+                    "maxReplicas": 1
+                  }
+                },
+                "configuration": {
+                  "secrets": [
+                    {
+                      "name": "rag-app-username",
+                      "value": "[parameters('ragAppUsername')]"
+                    },
+                    {
+                      "name": "rag-app-password",
+                      "value": "[parameters('ragAppPassword')]"
+                    },
+                    {
+                      "name": "acr-password",
+                      "value": "[parameters('acrPassword')]"
+                    }
+                  ],
+                  "ingress": {
+                    "external": true,
+                    "targetPort": 8501,
+                    "transport": "http",
+                    "allowInsecure": true
+                  },
+                  "registries": [
+                    {
+                      "server": "[parameters('acrLoginServer')]",
+                      "username": "[parameters('acrUsername')]",
+                      "passwordSecretRef": "acr-password"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.App/managedEnvironments', variables('containerAppsEnvName'))]",
+        "[resourceId('Microsoft.ContainerRegistry/registries', variables('acrName'))]",
+        "[resourceId('Microsoft.App/containerApps', variables('ollamaAppName'))]"
+      ]
+    }
+  ]
+}

@@ -1,11 +1,27 @@
 # Use the official Ollama base image
-FROM ollama/ollama
+FROM ollama/ollama:latest
 
-# Update underlying OS packages to patch known security vulnerabilities.
-# This is a best practice for hardening Docker images.
-RUN apt-get update && apt-get upgrade -y --no-install-recommends && rm -rf /var/lib/apt/lists/*
+# As a security best practice, update the OS packages to patch vulnerabilities.
+# The ollama base image is Debian-based, so we use apt.
+RUN apt-get update && apt-get upgrade -y --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy the entrypoint script and set it to run on container start
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-CMD ["/entrypoint.sh"]
+
+# The RUN command will execute when the image is built.
+# This pulls the mistral model into the image layer itself.
+# When a container starts from this image, the model is already present.
+# We must start the server in the background, wait for it to be ready,
+# pull the model, and then stop the server. This all happens in one RUN layer.
+RUN nohup ollama serve & \
+    ( \
+        while [ -z "$(ollama list)" ]; do \
+            echo "Waiting for ollama server to start..."; \
+            sleep 1; \
+        done && \
+        echo "Ollama server started." && \
+        ollama pull mistral \
+    ) && \
+    pkill ollama
+
+# The default command to start the ollama server is inherited from the base image,
+# so we don't need to specify a CMD or ENTRYPOINT.

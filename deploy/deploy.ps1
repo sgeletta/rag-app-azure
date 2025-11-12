@@ -23,6 +23,25 @@ param (
     [string]$ragAppUsername = 'ragapp'
 )
 
+# --- Helper Functions ---
+
+<#
+.SYNOPSIS
+    Securely converts a SecureString to a plain text string.
+.DESCRIPTION
+    This function is required for compatibility with older PowerShell versions that do not have the -AsPlainText parameter.
+    It uses .NET marshalling to handle the conversion in memory.
+#>
+function Convert-SecureStringToPlainText {
+    param([Parameter(Mandatory = $true)][System.Security.SecureString]$SecureString)
+    $pointer = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecureString)
+    try {
+        return [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($pointer)
+    }
+    finally {
+        [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($pointer)
+    }
+}
 # --- Main Script Logic ---
 
 Write-Host "Starting the Azure RAG application deployment." -ForegroundColor Cyan
@@ -68,29 +87,40 @@ if ($LASTEXITCODE -ne 0) {
 }
 Write-Host "Resource group created successfully." -ForegroundColor Green
 
-Write-Host "`nStarting Bicep deployment. This may take several minutes..." -ForegroundColor Cyan
-# Note: The -c flag automatically confirms that the deployment will incur a cost.
+# --- 3. Build and Push Docker Images ---
+
+$acrName = "${resourcePrefix}acr"
+
+# We need the ACR to exist before we can build and push images.
+# We will deploy the Bicep template in two stages.
+
+Write-Host "`nStarting Bicep deployment (Stage 1: Foundational Resources)..." -ForegroundColor Cyan
+# In the first stage, we deploy everything EXCEPT the container apps.
+# We do this by setting a parameter that the Bicep template will use to conditionally skip them.
 az deployment group create `
     --resource-group $resourceGroupName `
     --template-file "deploy/main.bicep" `
     --parameters resourcePrefix=$resourcePrefix `
                  ragAppUsername=$ragAppUsername `
-                 ragAppPassword=$ragAppPassword `
+                 ragAppPassword="$(Convert-SecureStringToPlainText -SecureString $ragAppPassword)" `
+                 deployApps=false `
     -c
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Error "Bicep deployment failed. Please check the output above for details. Aborting."
+    Write-Error "Bicep deployment (Stage 1) failed. Please check the output above for details. Aborting."
     exit 1
 }
-
-Write-Host "Bicep deployment completed successfully." -ForegroundColor Green
+Write-Host "Bicep Stage 1 deployment completed successfully." -ForegroundColor Green
 Write-Host "--------------------------------------------------------------------"
 
-# --- 3. Build and Push Docker Images ---
+# --- 4. Build and Push Docker Images ---
 
-$acrName = "${resourcePrefix}acr"
+# Generate a unique tag for this build to ensure Azure pulls the new image.
+$uniqueTag = Get-Date -Format 'yyyyMMddHHmmss'
+Write-Host "Generated unique image tag: $uniqueTag" -ForegroundColor Yellow
 
 Write-Host "Logging in to Azure Container Registry '$acrName'..." -ForegroundColor Cyan
+$acrLoginServer = az acr show --name $acrName --query "loginServer" --output tsv
 az acr login --name $acrName
 
 if ($LASTEXITCODE -ne 0) {
@@ -98,14 +128,12 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-$acrLoginServer = az acr show --name $acrName --query "loginServer" --output tsv
-
-# Define image names
-$ragAppImage = "$($acrLoginServer)/rag-app:latest"
-$ollamaAppImage = "$($acrLoginServer)/rag-app-ollama:latest"
+# Define image names with the unique tag
+$ragAppImage = "$($acrLoginServer)/rag-app:$($uniqueTag)"
+$ollamaAppImage = "$($acrLoginServer)/rag-app-ollama:$($uniqueTag)"
 
 Write-Host "`nBuilding and pushing rag-app image: '$ragAppImage'..." -ForegroundColor Cyan
-docker build -t $ragAppImage -f Dockerfile .
+docker build --no-cache -t $ragAppImage -f Dockerfile .
 docker push $ragAppImage
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Failed to push rag-app image. Aborting."
@@ -113,17 +141,38 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "`nBuilding and pushing ollama-app image: '$ollamaAppImage'..." -ForegroundColor Cyan
-docker build -t $ollamaAppImage -f ollama/Dockerfile ./ollama
+# Build the ollama image from its specific Dockerfile
+docker build -t $ollamaAppImage -f Dockerfile.ollama .
 docker push $ollamaAppImage
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Failed to push ollama-app image. Aborting."
     exit 1
 }
 
+
 Write-Host "Docker images pushed successfully." -ForegroundColor Green
 Write-Host "--------------------------------------------------------------------"
 
-# --- 4. Output Application URL ---
+# --- 5. Deploy Container Apps and Get URL ---
+
+Write-Host "`nStarting Bicep deployment (Stage 2: Application Services)..." -ForegroundColor Cyan
+# In the second stage, we re-run the deployment, this time with deployApps=true.
+# Bicep will see that the other resources already exist and only create the container apps.
+az deployment group create `
+    --resource-group $resourceGroupName `
+    --template-file "deploy/main.bicep" `
+    --parameters resourcePrefix=$resourcePrefix `
+                 ragAppUsername=$ragAppUsername `
+                 ragAppPassword="$(Convert-SecureStringToPlainText -SecureString $ragAppPassword)" `
+                 deployApps=true `
+                 imageTag=$uniqueTag `
+    -c
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Bicep deployment (Stage 2) failed. Please check the output above for details. Aborting."
+    exit 1
+}
+Write-Host "Bicep Stage 2 deployment completed successfully." -ForegroundColor Green
 
 $ragAppName = "${resourcePrefix}-rag-app"
 
