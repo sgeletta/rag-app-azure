@@ -2,6 +2,7 @@ import os
 import pickle
 import sqlite3
 from datetime import datetime
+from contextlib import contextmanager
 import shutil
 
 import matplotlib.pyplot as plt
@@ -19,7 +20,7 @@ from langchain_community.document_loaders import (
     UnstructuredWordDocumentLoader,
 )
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_community.llms import Ollama
+from langchain_community.chat_models import ChatOllama
 from langchain_community.vectorstores import FAISS
 
 # --- Constants ---
@@ -75,9 +76,12 @@ def get_llm():
     """Loads the Ollama LLM and caches it."""
     # Check for the Docker-specific environment variable, otherwise use the default localhost.
     base_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
-    # The `callbacks` parameter is deprecated. Callbacks are now configured on a per-call basis
-    # using .with_config(), but for basic streaming, LCEL's .stream() method is sufficient.
-    return Ollama(model="mistral", base_url=base_url)
+    # Ensure the URL includes the port. This is crucial for both local and Azure deployments.
+    # If the URL is just 'http://ollama', this ensures it becomes 'http://ollama:11434'.
+    if base_url.count(":") == 1: # e.g., http://ollama
+        base_url = f"{base_url}:11434"
+
+    return ChatOllama(model="mistral", base_url=base_url)
 
 def load_document(path):
     """Loads a document from a file path based on its extension."""
@@ -112,6 +116,7 @@ def _migrate_log_db_schema(conn):
         # The calling function's CREATE TABLE IF NOT EXISTS will handle it.
         pass
 
+@contextmanager
 def get_db_connection(project_name):
     """Context manager for handling SQLite database connections."""
     db_path = os.path.join(LOG_DIR, f"query_log_{project_name}.db")
@@ -612,8 +617,9 @@ def main():
                 st.session_state[db_session_key] = FAISS.load_local(
                     faiss_path, embeddings=embedding, allow_dangerous_deserialization=True
                 )
-            except (IOError, EOFError, pickle.UnpicklingError) as e:
-                st.error(f"Failed to load FAISS index: {e}. A re-index is required.")
+            except (IOError, EOFError, pickle.UnpicklingError, KeyError):
+                # If loading the index fails (e.g., due to a version mismatch after an update),
+                # silently delete the old index. The user will be prompted to re-index.
                 if os.path.exists(faiss_path) and os.path.isdir(faiss_path):
                     shutil.rmtree(faiss_path)
 
