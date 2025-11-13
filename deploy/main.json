@@ -218,7 +218,8 @@
                     "port": 11434
                   },
                   "initialDelaySeconds": 60,
-                  "periodSeconds": 30
+                  "periodSeconds": 30,
+                  "failureThreshold": 10
                 },
                 {
                   "type": "readiness",
@@ -227,7 +228,8 @@
                     "port": 11434
                   },
                   "initialDelaySeconds": 60,
-                  "periodSeconds": 30
+                  "periodSeconds": 30,
+                  "failureThreshold": 10
                 }
               ]
             }

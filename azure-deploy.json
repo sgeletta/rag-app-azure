@@ -4,21 +4,27 @@
     "parameters": {
         "environment_name": {
             "type": "string",
-            "defaultValue": "rag-app-env"
+            "defaultValue": "rag-app-env",
+            "metadata": { "description": "Name of the Azure Container Apps environment." }
         },
         "location": {
             "type": "string",
-            "defaultValue": "eastus"
+            "defaultValue": "eastus",
+            "metadata": { "description": "Azure region for resource deployment." }
         },
         "acr_name": {
             "type": "string",
-            "defaultValue": "ragappacr9626"
+            "defaultValue": "ragappacr9626",
+            "metadata": { "description": "Name of the Azure Container Registry." }
         },
         "storage_account_name": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "ragappstorage",
+            "metadata": { "description": "Name of the Azure Storage Account for file shares." }
         },
         "acr_admin_password": {
-            "type": "securestring"
+            "type": "securestring",
+            "metadata": { "description": "Admin password for the Azure Container Registry." }
         },
         "rag_app_username": {
             "type": "securestring",
@@ -80,7 +86,7 @@
                         {
                             "name": "ollama-data-volume",
                             "storageType": "AzureFile",
-                            "storageName": "ragappstorage"
+                            "storageName": "[parameters('storage_account_name')]"
                         }
                     ],
                     "scale": {
@@ -161,9 +167,9 @@
                         }
                     ],
                     "volumes": [
-                        { "name": "docs-volume", "storageType": "AzureFile", "storageName": "ragappstorage" },
-                        { "name": "faiss-indexes-volume", "storageType": "AzureFile", "storageName": "ragappstorage" },
-                        { "name": "logs-volume", "storageType": "AzureFile", "storageName": "ragappstorage" }
+                        { "name": "docs-volume", "storageType": "AzureFile", "storageName": "[parameters('storage_account_name')]" },
+                        { "name": "faiss-indexes-volume", "storageType": "AzureFile", "storageName": "[parameters('storage_account_name')]" },
+                        { "name": "logs-volume", "storageType": "AzureFile", "storageName": "[parameters('storage_account_name')]" }
                     ],
                     "scale": {
                         "minReplicas": 1,

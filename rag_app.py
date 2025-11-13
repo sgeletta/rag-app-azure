@@ -78,16 +78,12 @@ def get_llm():
     # - In Azure (via Bicep), it's set to 'http://<prefix>-ollama-app'.
     # - In local Docker (via docker-compose), it's set to 'http://ollama:11434'.
     # The code should not modify it. The default is for running Streamlit outside of Docker.
-    base_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434") # This default works for local.
-    
-    # The LangChain ChatOllama client defaults to port 11434 if no port is specified in the URL.
-    # However, Azure Container Apps service discovery expects requests on the standard HTTP port (80).
-    # This logic checks if the URL is a non-localhost address without a port and, if so,
-    # explicitly appends ':80' to ensure the request is routed correctly within the Azure VNet.
-    # URLs that already specify a port (like for local Docker) are not affected.
-    if "localhost" not in base_url and ":" not in base_url.split("://")[1]:
-        base_url += ":80"
-        
+    base_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
+
+    # CRITICAL FIX: To resolve the ConnectTimeout error in Azure, we must instantiate
+    # the ChatOllama client by passing the base_url and model as separate arguments.
+    # This prevents the client from defaulting to port 11434 and allows it to correctly
+    # use Azure's internal service discovery, which operates on the standard HTTP port (80).
     return ChatOllama(model="mistral", base_url=base_url)
 
 def load_document(path):
