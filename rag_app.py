@@ -74,9 +74,10 @@ def get_embedding_model():
 @st.cache_resource
 def get_llm():
     """Loads the Ollama LLM and caches it."""
-    # Check for the Docker-specific environment variable, otherwise use the default localhost.
-    # For Azure Container Apps, the URL is the app name (e.g., http://ollama-app), which resolves on port 80.
-    # For local Docker, the URL must include the port (e.g., http://ollama:11434).
+    # The OLLAMA_BASE_URL environment variable is the single source of truth.
+    # - In Azure (via Bicep), it's set to 'http://<prefix>-ollama-app'.
+    # - In local Docker (via docker-compose), it's set to 'http://ollama:11434'.
+    # The code should not modify it. The default is for running Streamlit outside of Docker.
     base_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434") # This default works for local.
 
     return ChatOllama(model="mistral", base_url=base_url)
