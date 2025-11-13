@@ -62,6 +62,7 @@
     "fileShareName": "ragappdata",
     "containerAppsEnvName": "[format('{0}-cae', parameters('resourcePrefix'))]",
     "ollamaAppName": "[format('{0}-ollama-app', parameters('resourcePrefix'))]",
+    "ollamaTargetPort": 11434,
     "ollamaImage": "[format('{0}.azurecr.io/rag-app-ollama:latest', variables('acrName'))]",
     "ragAppName": "[format('{0}-rag-app', parameters('resourcePrefix'))]",
     "ragAppImage": "[format('{0}.azurecr.io/rag-app:latest', variables('acrName'))]"
@@ -258,7 +259,7 @@
           "secrets": [
             {
               "name": "acr-password",
-              "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2023-01-01-preview').passwords[0].value]"
+              "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2023-07-01').passwords[0].value]"
             }
           ]
         }
@@ -422,6 +423,35 @@
                     "rules": []
                   },
                   "volumes": []
+                },
+                "configuration": {
+                  "secrets": [
+                    {
+                      "name": "rag-app-username",
+                      "value": "[parameters('ragAppUsername')]"
+                    },
+                    {
+                      "name": "rag-app-password",
+                      "value": "[parameters('ragAppPassword')]"
+                    },
+                    {
+                      "name": "acr-password",
+                      "value": "[parameters('acrPassword')]"
+                    }
+                  ],
+                  "ingress": {
+                    "external": true,
+                    "targetPort": 8501,
+                    "transport": "http",
+                    "allowInsecure": true
+                  },
+                  "registries": [
+                    {
+                      "server": "[parameters('acrLoginServer')]",
+                      "username": "[parameters('acrUsername')]",
+                      "passwordSecretRef": "acr-password"
+                    }
+                  ]
                 }
               }
             }

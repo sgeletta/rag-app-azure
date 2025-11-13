@@ -80,12 +80,12 @@ def get_llm():
     # The code should not modify it. The default is for running Streamlit outside of Docker.
     base_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434") # This default works for local.
     
-    # In Azure Container Apps, the internal service discovery name (e.g., 'http://ollama-app')
-    # resolves to an IP on the standard HTTP port (80). The LangChain client, however,
-    # defaults to port 11434 if no port is specified. To fix this, we explicitly add
-    # port 80 if the URL is for an internal Azure service (i.e., it has no port).
-    # The local docker-compose URL ('http://ollama:11434') already has a port and will be unaffected.
-    if ".internal." in base_url and ":" not in base_url.split("://")[1]:
+    # The LangChain ChatOllama client defaults to port 11434 if no port is specified in the URL.
+    # However, Azure Container Apps service discovery expects requests on the standard HTTP port (80).
+    # This logic checks if the URL is a non-localhost address without a port and, if so,
+    # explicitly appends ':80' to ensure the request is routed correctly within the Azure VNet.
+    # URLs that already specify a port (like for local Docker) are not affected.
+    if "localhost" not in base_url and ":" not in base_url.split("://")[1]:
         base_url += ":80"
         
     return ChatOllama(model="mistral", base_url=base_url)
