@@ -3,6 +3,10 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "environment_name": {
+      "type": "string",
+      "defaultValue": "rag-app-env"
+    },
+    "resourcePrefix": {
             "type": "string",
             "defaultValue": "rag-app-env"
         },
@@ -15,9 +19,6 @@
             "defaultValue": "ragappacr9626"
         },
         "storage_account_name": {
-            "type": "string"
-        },
-        "storage_account_key": {
             "type": "securestring"
         },
         "acr_admin_password": {
@@ -32,11 +33,14 @@
             "metadata": { "description": "Password for the RAG application UI." }
         }
     },
+  "variables": {
+    "storageAccountName": "[concat(parameters('resourcePrefix'), uniqueString(resourceGroup().id))]"
+  },
     "resources": [
         {
             "name": "ollama-app",
             "type": "Microsoft.App/containerApps",
-            "apiVersion": "2022-11-01-preview",
+      "apiVersion": "2023-05-01",
             "kind": "containerapp",
             "location": "[parameters('location')]",
             "properties": {
@@ -44,26 +48,23 @@
                 "configuration": {
                     "secrets": [
                         {
-                            "name": "storage-account-key",
-                            "value": "[parameters('storage_account_key')]"
-                        },
-                        {
-                            "name": "acr-password",
-                            "value": "[parameters('acr_admin_password')]"
-                        }
-                    ],
-                    "ingress": {
-                        "external": false,
-                        "targetPort": 11434,
-                        "transport": "http"
-                    },
-                    "registries": [
-                        {
-                            "server": "[concat(parameters('acr_name'), '.azurecr.io')]",
-                            "username": "[parameters('acr_name')]",
-                            "passwordSecretRef": "acr-password"
-                        }
-                    ]
+              "name": "acr-password",
+              "value": "[parameters('acr_admin_password')]"
+            }
+          ],
+          "ingress": {
+            "external": false,
+            "targetPort": 11434,
+            "transport": "http"
+          },
+          "registries": [
+            {
+              "server": "[concat(parameters('acr_name'), '.azurecr.io')]",
+              "username": "[parameters('acr_name')]",
+              "passwordSecretRef": "acr-password"
+            }
+          ],
+          "dapr": { "enabled": false }
                 },
                 "template": {
                     "containers": [
@@ -95,7 +96,7 @@
         {
             "name": "rag-app",
             "type": "Microsoft.App/containerApps",
-            "apiVersion": "2022-11-01-preview",
+      "apiVersion": "2023-05-01",
             "kind": "containerapp",
             "location": "[parameters('location')]",
             "dependsOn": [
@@ -105,10 +106,6 @@
                 "managedEnvironmentId": "[resourceId('Microsoft.App/managedEnvironments', parameters('environment_name'))]",
                 "configuration": {
                     "secrets": [
-                        {
-                            "name": "storage-account-key",
-                            "value": "[parameters('storage_account_key')]"
-                        },
                         {
                             "name": "acr-password",
                             "value": "[parameters('acr_admin_password')]"
@@ -133,7 +130,8 @@
                             "username": "[parameters('acr_name')]",
                             "passwordSecretRef": "acr-password"
                         }
-                    ]
+          ],
+          "dapr": { "enabled": false }
                 },
                 "template": {
                     "containers": [
@@ -143,7 +141,7 @@
                             "env": [
                                 {
                                     "name": "OLLAMA_BASE_URL",
-                                    "value": "http://ollama-app:11434"
+                                    "value": "http://ollama-app"
                                 },
                                 {
                                     "name": "RAG_APP_USERNAME",

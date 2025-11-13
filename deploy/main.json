@@ -57,8 +57,8 @@
     "vnetName": "[format('{0}-vnet', parameters('resourcePrefix'))]",
     "containerAppsEnvSubnetName": "cae-subnet",
     "otherSubnetName": "default-subnet",
-    "acrName": "[format('{0}acr', parameters('resourcePrefix'))]",
-    "storageAccountName": "[format('{0}storage', parameters('resourcePrefix'))]",
+    "acrName": "[toLower(format('{0}acr', parameters('resourcePrefix')))]",
+    "storageAccountName": "[substring(replace(toLower(format('{0}storage{1}', parameters('resourcePrefix'), uniqueString(resourceGroup().id))), '-', ''), 0, 24)]",
     "fileShareName": "ragappdata",
     "containerAppsEnvName": "[format('{0}-cae', parameters('resourcePrefix'))]",
     "ollamaAppName": "[format('{0}-ollama-app', parameters('resourcePrefix'))]",
@@ -108,7 +108,7 @@
     },
     {
       "type": "Microsoft.ContainerRegistry/registries",
-      "apiVersion": "2023-01-01-preview",
+      "apiVersion": "2023-07-01",
       "name": "[variables('acrName')]",
       "location": "[parameters('location')]",
       "sku": {
@@ -120,7 +120,7 @@
     },
     {
       "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2023-01-01",
       "name": "[variables('storageAccountName')]",
       "location": "[parameters('location')]",
       "sku": {
@@ -130,7 +130,7 @@
     },
     {
       "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
-      "apiVersion": "2022-09-01",
+      "apiVersion": "2023-01-01",
       "name": "[format('{0}/{1}/{2}', variables('storageAccountName'), 'default', variables('fileShareName'))]",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
@@ -138,7 +138,7 @@
     },
     {
       "type": "Microsoft.App/managedEnvironments",
-      "apiVersion": "2023-05-01",
+      "apiVersion": "2023-11-02-preview",
       "name": "[variables('containerAppsEnvName')]",
       "location": "[parameters('location')]",
       "properties": {
@@ -161,13 +161,13 @@
     },
     {
       "type": "Microsoft.App/managedEnvironments/storages",
-      "apiVersion": "2023-05-01",
+      "apiVersion": "2023-11-02-preview",
       "name": "[format('{0}/{1}', variables('containerAppsEnvName'), 'ollama-storage')]",
       "properties": {
         "azureFile": {
           "shareName": "[variables('fileShareName')]",
           "accountName": "[variables('storageAccountName')]",
-          "accountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-09-01').keys[0].value]",
+          "accountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2023-01-01').keys[0].value]",
           "accessMode": "ReadWrite"
         }
       },
@@ -179,7 +179,7 @@
     {
       "condition": "[parameters('deployApps')]",
       "type": "Microsoft.App/containerApps",
-      "apiVersion": "2023-05-01",
+      "apiVersion": "2023-11-02-preview",
       "name": "[variables('ollamaAppName')]",
       "location": "[parameters('location')]",
       "properties": {
@@ -246,13 +246,13 @@
         "configuration": {
           "registries": [
             {
-              "server": "[reference(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2023-01-01-preview').loginServer]",
+              "server": "[reference(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2023-07-01').loginServer]",
               "username": "[variables('acrName')]",
               "passwordSecretRef": "acr-password"
             }
           ],
           "ingress": {
-            "targetPort": 11434,
+            "targetPort": "[variables('ollamaTargetPort')]",
             "transport": "http"
           },
           "secrets": [
@@ -272,7 +272,7 @@
     {
       "condition": "[parameters('deployApps')]",
       "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2025-04-01",
+      "apiVersion": "2022-09-01",
       "name": "ragAppDeployment",
       "properties": {
         "expressionEvaluationOptions": {
@@ -299,16 +299,16 @@
             "value": "[parameters('ragAppPassword')]"
           },
           "acrLoginServer": {
-            "value": "[reference(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2023-01-01-preview').loginServer]"
+            "value": "[reference(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2023-07-01').loginServer]"
           },
           "acrUsername": {
             "value": "[variables('acrName')]"
           },
           "acrPassword": {
-            "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2023-01-01-preview').passwords[0].value]"
+            "value": "[listCredentials(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2023-07-01').passwords[0].value]"
           },
           "ollamaBaseUrl": {
-            "value": "[format('http://{0}:{1}', reference(resourceId('Microsoft.App/containerApps', variables('ollamaAppName')), '2023-05-01').configuration.ingress.fqdn, reference(resourceId('Microsoft.App/containerApps', variables('ollamaAppName')), '2023-05-01').configuration.ingress.targetPort)]"
+            "value": "[format('http://{0}', variables('ollamaAppName'))]"
           }
         },
         "template": {
@@ -386,7 +386,7 @@
           "resources": [
             {
               "type": "Microsoft.App/containerApps",
-              "apiVersion": "2023-05-01",
+              "apiVersion": "2023-11-02-preview",
               "name": "[parameters('ragAppName')]",
               "location": "[parameters('location')]",
               "properties": {
@@ -418,37 +418,10 @@
                   ],
                   "scale": {
                     "minReplicas": 1,
-                    "maxReplicas": 1
-                  }
-                },
-                "configuration": {
-                  "secrets": [
-                    {
-                      "name": "rag-app-username",
-                      "value": "[parameters('ragAppUsername')]"
-                    },
-                    {
-                      "name": "rag-app-password",
-                      "value": "[parameters('ragAppPassword')]"
-                    },
-                    {
-                      "name": "acr-password",
-                      "value": "[parameters('acrPassword')]"
-                    }
-                  ],
-                  "ingress": {
-                    "external": true,
-                    "targetPort": 8501,
-                    "transport": "http",
-                    "allowInsecure": true
+                    "maxReplicas": 1,
+                    "rules": []
                   },
-                  "registries": [
-                    {
-                      "server": "[parameters('acrLoginServer')]",
-                      "username": "[parameters('acrUsername')]",
-                      "passwordSecretRef": "acr-password"
-                    }
-                  ]
+                  "volumes": []
                 }
               }
             }
