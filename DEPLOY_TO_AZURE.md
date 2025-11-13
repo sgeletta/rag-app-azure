@@ -4,6 +4,10 @@ This guide provides step-by-step instructions to deploy the entire RAG (Retrieva
 
 The deployment is fully automated using Azure Bicep for Infrastructure as Code (IaC).
 
+> **Note on Deployment Methods**: This project offers two ways to deploy to Azure:
+> 1.  **Manual Deployment (`deploy.ps1`)**: The method described in this document. It is designed to create a new, independent instance of the application stack and will prompt you for a unique `resourcePrefix` to name the resources. Use this for initial setup, testing, or creating multiple separate environments.
+> 2.  **Automated Deployment (CI/CD)**: A GitHub Actions workflow is configured to automatically update a primary application instance whenever code is pushed to the `main` branch. In that workflow, the `resourcePrefix` is hardcoded, as its purpose is to update a single, persistent environment, not create new ones.
+
 ---
 
 ## 1. Prerequisites

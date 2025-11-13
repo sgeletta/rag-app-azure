@@ -129,7 +129,7 @@ resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2023-05-01'
   properties: {
     // This makes the environment internal, meaning apps are only accessible from inside the VNet.
     vnetConfiguration: {
-      internal: false // Change to false for public access to rag-app
+      internal: false // This creates an External environment, allowing apps to be exposed to the internet.
       infrastructureSubnetId: virtualNetwork.properties.subnets[0].id // Reference the 'cae-subnet'
     }
     // Link to the Log Analytics workspace for logging and monitoring.
@@ -189,35 +189,33 @@ resource ollamaApp 'Microsoft.App/containerApps@2023-05-01' = if (deployApps) {
           // --- FIX: Use a patient startup probe to allow for long model download times ---
           probes: [
             // Startup probe: Gives the container up to 16 minutes to start before being killed.
-            // Total timeout = initialDelaySeconds + (periodSeconds * failureThreshold)
-            // 60s + (30s * 30) = 960s = 16 minutes
+            // A TCP probe is used because the Ollama server doesn't respond to HTTP GET on '/'.
+            // This simply checks if the port is open, which is sufficient to know the service is starting.
+            // Total timeout = 60s initial delay + (30s period * 30 failures) = 960s = 16 minutes.
             {
               type: 'startup'
-              httpGet: {
-                path: '/'
+              tcpSocket: {
                 port: 11434
               }
               initialDelaySeconds: 60
               periodSeconds: 30
               failureThreshold: 30
             }
-            // Liveness probe: Once started, checks if the app is still running.
-            // If this fails, the container is restarted.
+            // Liveness probe: After startup, periodically checks if the port is still open.
+            // If this fails (e.g., the process crashes), the container is restarted.
             {
               type: 'liveness'
-              httpGet: {
-                path: '/'
+              tcpSocket: {
                 port: 11434
               }
               initialDelaySeconds: 60
               periodSeconds: 30
             }
-            // Readiness probe: Once started, checks if the app is ready to accept traffic.
-            // If this fails, the container is removed from the load balancer.
+            // Readiness probe: After startup, checks if the app is ready to accept traffic.
+            // If this fails, the container is temporarily removed from service discovery until it passes again.
             {
               type: 'readiness'
-              httpGet: {
-                path: '/'
+              tcpSocket: {
                 port: 11434
               }
               initialDelaySeconds: 60
@@ -252,9 +250,11 @@ resource ollamaApp 'Microsoft.App/containerApps@2023-05-01' = if (deployApps) {
       ]
       // Allow the app to be reached from other apps in the environment
       ingress: {
-        external: false // To make an app internal, the 'external' property must be set to false.
-        targetPort: 11434
-        transport: 'http'
+        external: false
+        // CRITICAL FIX: Expose port 80 for service discovery, and let ACA handle the mapping to the container's target port.
+        // The internal DNS resolver only works on standard ports (80/443).
+        targetPort: 11434 // The port the container is listening on.
+        transport: 'http' // The protocol for the ingress.
         // Because the environment is internal, this ingress is also internal.
         // It will not be accessible from the public internet.
       }
@@ -285,8 +285,8 @@ module ragAppModule 'ragApp.bicep' = if (deployApps) {
     acrLoginServer: containerRegistry.properties.loginServer
     acrUsername: containerRegistry.name
     acrPassword: containerRegistry.listCredentials().passwords[0].value
-    // The URL is constructed here, safely inside the conditional deployment block for the module.
-    // For internal service discovery, only the FQDN is needed. The port is resolved automatically.
-    ollamaBaseUrl: 'http://${ollamaApp!.properties.configuration.ingress.fqdn}'
+    // CRITICAL FIX: For internal service discovery, we must use the app's name, not its FQDN.
+    // The Container Apps DNS resolver will automatically map this short name to the correct internal IP.
+    ollamaBaseUrl: 'http://${ollamaAppName}'
   }
 }
