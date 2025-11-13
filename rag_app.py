@@ -75,11 +75,9 @@ def get_embedding_model():
 def get_llm():
     """Loads the Ollama LLM and caches it."""
     # Check for the Docker-specific environment variable, otherwise use the default localhost.
-    base_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
-    # Ensure the URL includes the port. This is crucial for both local and Azure deployments.
-    # If the URL is just 'http://ollama', this ensures it becomes 'http://ollama:11434'.
-    if base_url.count(":") == 1: # e.g., http://ollama
-        base_url = f"{base_url}:11434"
+    # For Azure Container Apps, the URL is the app name (e.g., http://ollama-app), which resolves on port 80.
+    # For local Docker, the URL must include the port (e.g., http://ollama:11434).
+    base_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434") # This default works for local.
 
     return ChatOllama(model="mistral", base_url=base_url)
 
