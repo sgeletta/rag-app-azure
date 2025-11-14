@@ -19,6 +19,10 @@ docs/
 faiss_indexes/
 logs/
 
+# Ignore local Ollama model data, which can be very large.
+# This is generated during local testing and should not be part of the image.
+ollama_data/
+
 # Ignore IDE and OS-specific files
 .vscode/
 .idea/
