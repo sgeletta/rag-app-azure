@@ -252,13 +252,12 @@ resource ollamaApp 'Microsoft.App/containerApps@2023-05-01' = if (deployApps) {
       ]
       // Allow the app to be reached from other apps in the environment
       ingress: {
-        external: false
-        // CRITICAL FIX: Expose port 80 for service discovery, and let ACA handle the mapping to the container's target port.
-        // The internal DNS resolver only works on standard ports (80/443).
+        external: false // Keep the app internal to the vnet.
+        exposedPort: 80 // CRITICAL FIX: Expose port 80 for internal service discovery.
         targetPort: 11434 // The port the container is listening on.
         transport: 'http' // The protocol for the ingress.
-        // Because the environment is internal, this ingress is also internal.
-        // It will not be accessible from the public internet.
+        // Now, requests to http://ollama-app (which defaults to port 80) will be
+        // correctly routed by ACA to port 11434 on this container.
       }
       // Define secrets for the app. This includes the ACR password.
       secrets: [
