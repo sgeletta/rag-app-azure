@@ -1,0 +1,70 @@
+name: Build and Deploy to Azure Container Apps
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  # IMPORTANT: Replace 'your-prefix-here' with the exact resource prefix
+  # you used when you ran the deploy.ps1 script (e.g., 'ragprod', 'sgrag2025').
+  # This prefix will now be the single source of truth for all resource names in this workflow.
+  RESOURCE_PREFIX: 'ragdimain'
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🧹 Maximize build space
+        uses: easimon/maximize-build-space@v10
+        with:
+          root-reserve-mb: 512
+          swap-size-mb: 1024
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Log in to Azure Container Registry
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ env.RESOURCE_PREFIX }}acr.azurecr.io
+          username: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientId }}
+          password: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientSecret }}
+
+      - name: 🕵️ List files in build context
+        run: |
+          echo "Listing all files and directories..."
+          ls -la
+          echo "-------------------------------------"
+          echo "Checking for .dockerignore content..."
+          cat .dockerignore || echo ".dockerignore not found"
+
+      - name: Build and push rag-app image
+        run: |
+          docker build . -f Dockerfile -t ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app:latest
+          docker push ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app:latest
+
+      - name: Build and push ollama-app image
+        run: |
+          docker build . -f Dockerfile.ollama -t ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app-ollama:latest
+          docker push ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app-ollama:latest
+
+      - name: Update Azure Container App
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          azureCredentials: ${{ secrets.AZURE_CREDENTIALS }}
+          resourceGroupName: ${{ env.RESOURCE_PREFIX }}-rg
+          # This action can only update one app at a time. We update the rag-app,
+          # as the ollama-app rarely changes. The Bicep deployment ensures both apps
+          # reference the 'latest' tag, so they will pull the new images on their next revision.
+          containerAppName: ${{ env.RESOURCE_PREFIX }}-rag-app
+          imageToUpdate: ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app:latest
