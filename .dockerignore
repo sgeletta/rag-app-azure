@@ -1,11 +1,25 @@
-# Git
-.git/
-.gitignore
+# .dockerignore
 
-# Virtual environment
-.venv/
+# Ignore Python virtual environments
 venv/
+.venv/
 
-# IDE and editor files
-.idea/
+# Ignore Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore local development and testing artifacts
+.pytest_cache/
+
+# Ignore application-generated data, logs, and indexes from local runs.
+# These should be mounted as volumes in production, not baked into the image.
+docs/
+faiss_indexes/
+logs/
+
+# Ignore IDE and OS-specific files
 .vscode/
+.idea/
+.DS_Store
