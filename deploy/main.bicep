@@ -29,8 +29,10 @@ var logAnalyticsWorkspaceName = '${resourcePrefix}-logs'
 var vnetName = '${resourcePrefix}-vnet'
 var containerAppsEnvSubnetName = 'cae-subnet'
 var otherSubnetName = 'default-subnet'
-var acrName = '${resourcePrefix}acr'
-var storageAccountName = '${resourcePrefix}storage'
+var acrName = toLower('${resourcePrefix}acr')
+// Storage account names must be globally unique, 3-24 characters long, and use only lowercase letters and numbers.
+// Appending a unique string derived from the resource group ID ensures uniqueness.
+var storageAccountName = substring(replace(toLower('${resourcePrefix}storage${uniqueString(resourceGroup().id)}'), '-', ''), 0, 24)
 var fileShareName = 'ragappdata'
 var containerAppsEnvName = '${resourcePrefix}-cae'
 var ollamaAppName = '${resourcePrefix}-ollama-app'
