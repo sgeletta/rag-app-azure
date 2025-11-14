@@ -38,15 +38,23 @@ jobs:
           echo "Checking for .dockerignore content..."
           cat .dockerignore || echo ".dockerignore not found"
 
-      - name: Build and push Docker image
+      - name: Build and push rag-app image
         run: |
-          docker build . -t ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/${{ env.RESOURCE_PREFIX }}-rag-app:latest
-          docker push ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/${{ env.RESOURCE_PREFIX }}-rag-app:latest
+          docker build . -f Dockerfile -t ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app:latest
+          docker push ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app:latest
+
+      - name: Build and push ollama-app image
+        run: |
+          docker build . -f Dockerfile.ollama -t ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app-ollama:latest
+          docker push ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app-ollama:latest
 
       - name: Update Azure Container App
         uses: azure/container-apps-deploy-action@v1
         with:
           azureCredentials: ${{ secrets.AZURE_CREDENTIALS }}
           resourceGroupName: ${{ env.RESOURCE_PREFIX }}-rg
+          # This action can only update one app at a time. We update the rag-app,
+          # as the ollama-app rarely changes. The Bicep deployment ensures both apps
+          # reference the 'latest' tag, so they will pull the new images on their next revision.
           containerAppName: ${{ env.RESOURCE_PREFIX }}-rag-app
-          imageToUpdate: ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/${{ env.RESOURCE_PREFIX }}-rag-app:latest
+          imageToUpdate: ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app:latest
