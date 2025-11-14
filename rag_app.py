@@ -77,13 +77,18 @@ def get_llm():
     # The OLLAMA_BASE_URL environment variable is the single source of truth.
     # - In Azure (via Bicep), it's set to 'http://<prefix>-ollama-app'.
     # - In local Docker (via docker-compose), it's set to 'http://ollama:11434'.
-    # The code should not modify it. The default is for running Streamlit outside of Docker.
-    base_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
+    # The default is for running Streamlit locally outside of any container orchestration.
+    base_url = os.environ.get("OLLAMA_BASE_URL")
 
-    # CRITICAL FIX: To resolve the ConnectTimeout error in Azure, we must instantiate
-    # the ChatOllama client by passing the base_url and model as separate arguments.
-    # This prevents the client from defaulting to port 11434 and allows it to correctly
-    # use Azure's internal service discovery, which operates on the standard HTTP port (80).
+    # If the environment variable is not set, we default to the local development URL.
+    # This makes the code's behavior more explicit.
+    if not base_url:
+        print("WARNING: OLLAMA_BASE_URL not set. Defaulting to http://localhost:11434 for local development.")
+        base_url = "http://localhost:11434"
+
+    # In Azure, the URL will be 'http://<app-name>' and the client will correctly connect to port 80.
+    # For local Docker, the URL is 'http://ollama:11434' and the client connects to the specified port.
+    # This single instantiation now correctly handles all environments.
     return ChatOllama(model="mistral", base_url=base_url)
 
 def load_document(path):
