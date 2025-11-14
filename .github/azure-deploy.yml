@@ -30,6 +30,14 @@ jobs:
           username: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientId }}
           password: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientSecret }}
 
+      - name: 🕵️ List files in build context
+        run: |
+          echo "Listing all files and directories..."
+          ls -la
+          echo "-------------------------------------"
+          echo "Checking for .dockerignore content..."
+          cat .dockerignore || echo ".dockerignore not found"
+
       - name: Build and push Docker image
         run: |
           docker build . -t ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/${{ env.RESOURCE_PREFIX }}-rag-app:latest
