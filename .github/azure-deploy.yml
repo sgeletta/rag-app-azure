@@ -15,20 +15,21 @@ jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: 🧹 Maximize build space
-        uses: easimon/maximize-build-space@v10
-        with:
-          root-reserve-mb: 512
-          swap-size-mb: 1024
-          remove-dotnet: 'true'
-          remove-android: 'true'
-          remove-haskell: 'true'
-          remove-codeql: 'true'
-
-      - name: Remove unused Docker images
-        run: docker system prune -af
-      - name: Clean up temporary files
-        run: sudo rm -rf /tmp/*
+      - name: Free disk space / prune Docker
+        if: runner.os == 'Linux'
+        run: |
+          set -eux
+          echo "Before cleanup:"
+          df -h
+          sudo docker system df || true
+          sudo docker system prune -af --volumes || true
+          sudo docker image prune -af || true
+          rm -rf $HOME/.cache/pip $HOME/.cache/pypoetry $HOME/.npm $HOME/.cache/huggingface || true
+          sudo apt-get clean || true
+          sudo rm -rf /tmp/* || true
+          echo "After cleanup:"
+          df -h
+          sudo docker system df || true
 
       - name: Checkout code
         uses: actions/checkout@v4
