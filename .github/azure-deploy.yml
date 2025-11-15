@@ -13,24 +13,8 @@ env:
 
 jobs:
   build_and_deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      - name: Free disk space / prune Docker
-        if: runner.os == 'Linux'
-        run: |
-          set -eux
-          echo "Before cleanup:"
-          df -h
-          sudo docker system df || true
-          sudo docker system prune -af --volumes || true
-          sudo docker image prune -af || true
-          rm -rf $HOME/.cache/pip $HOME/.cache/pypoetry $HOME/.npm $HOME/.cache/huggingface || true
-          sudo apt-get clean || true
-          sudo rm -rf /tmp/* || true
-          echo "After cleanup:"
-          df -h
-          sudo docker system df || true
-
       - name: Checkout code
         uses: actions/checkout@v4
 
