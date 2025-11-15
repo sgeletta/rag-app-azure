@@ -37,8 +37,10 @@ RUN apt-get update && apt-get upgrade -y --no-install-recommends \
 COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Copy the application code
-COPY . .
+# Copy only the necessary application files instead of the entire directory.
+# This creates a smaller, more secure image by excluding unnecessary files
+# like Bicep templates, the .git folder, and other development artifacts.
+COPY rag_app.py .
 
 # Create a non-root user and change ownership of the app directory
 RUN useradd --create-home appuser && chown -R appuser:appuser /app
