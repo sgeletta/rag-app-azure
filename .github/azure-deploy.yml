@@ -16,6 +16,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Deploy Foundational Resources (Stage 1)
+        uses: azure/arm-deploy@v1
+        with:
+          resourceGroupName: ${{ env.RESOURCE_PREFIX }}-rg
+          template: ./deploy/main.bicep
+          parameters: >
+            resourcePrefix=${{ env.RESOURCE_PREFIX }}
+            ragAppUsername=${{ secrets.RAG_APP_USERNAME }}
+            ragAppPassword=${{ secrets.RAG_APP_PASSWORD }}
+            deployApps=false
+          failOnStdErr: false
+          scope: resourcegroup
+          deploymentName: gh-workflow-foundational-${{ github.run_id }}
+
       - name: Log in to Azure
         uses: azure/login@v1
         with:
@@ -50,7 +64,7 @@ jobs:
           echo "Cleaning up ollama-app image..."
           docker rmi ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app-ollama:latest
 
-      - name: Deploy Bicep template
+      - name: Deploy Application Services (Stage 2)
         uses: azure/arm-deploy@v1
         with:
           resourceGroupName: ${{ env.RESOURCE_PREFIX }}-rg
@@ -59,7 +73,7 @@ jobs:
             resourcePrefix=${{ env.RESOURCE_PREFIX }}
             ragAppUsername=${{ secrets.RAG_APP_USERNAME }}
             ragAppPassword=${{ secrets.RAG_APP_PASSWORD }}
-            imageTag=latest
+            deployApps=true
           failOnStdErr: false
           scope: resourcegroup
           deploymentName: gh-workflow-deployment-${{ github.run_id }}
