@@ -42,11 +42,15 @@ jobs:
         run: |
           docker build . -f Dockerfile -t ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app:latest
           docker push ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app:latest
+          echo "Cleaning up rag-app image..."
+          docker rmi ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app:latest
 
       - name: Build and push ollama-app image
         run: |
           docker build . -f Dockerfile.ollama -t ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app-ollama:latest
           docker push ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app-ollama:latest
+          echo "Cleaning up ollama-app image..."
+          docker rmi ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app-ollama:latest
 
       - name: Update Azure Container App
         uses: azure/container-apps-deploy-action@v1

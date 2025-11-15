@@ -286,8 +286,8 @@ module ragAppModule 'ragApp.bicep' = if (deployApps) {
     acrLoginServer: containerRegistry.properties.loginServer
     acrUsername: containerRegistry.name
     acrPassword: containerRegistry.listCredentials().passwords[0].value
-    // CRITICAL FIX: For internal service discovery, we must use the app's name, not its FQDN.
-    // The Container Apps DNS resolver will automatically map this short name to the correct internal IP.
-    ollamaBaseUrl: 'http://${ollamaAppName}'
+    // CRITICAL FIX: To resolve persistent connection issues, we will use the full internal FQDN.
+    // This makes the connection explicit and removes any ambiguity in DNS resolution.
+    ollamaBaseUrl: 'http://${ollamaApp.properties.configuration.ingress.fqdn}'
   }
 }
