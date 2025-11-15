@@ -48,30 +48,27 @@ jobs:
         uses: azure/docker-login@v1
         with:
           login-server: ${{ env.RESOURCE_PREFIX }}acr.azurecr.io
-          username: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientId }}
-          password: ${{ fromJson(secrets.AZURE_CREDENTIALS).clientSecret }}
 
       - name: 🕵️ List files in build context
         run: |
           echo "Listing all files and directories..."
           ls -la
-          echo "-------------------------------------"
-          echo "Checking for .dockerignore content..."
-          cat .dockerignore || echo ".dockerignore not found"
 
-      - name: Build and push rag-app image
-        run: |
-          docker build . -f Dockerfile -t ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app:latest
-          docker push ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app:latest
-          echo "Cleaning up rag-app image..."
-          docker rmi ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app:latest
+      - name: Build and push rag-app container image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app:${{ github.sha }}
 
-      - name: Build and push ollama-app image
-        run: |
-          docker build . -f Dockerfile.ollama -t ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app-ollama:latest
-          docker push ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app-ollama:latest
-          echo "Cleaning up ollama-app image..."
-          docker rmi ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app-ollama:latest
+      - name: Build and push ollama-app container image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.ollama
+          push: true
+          tags: ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app-ollama:${{ github.sha }}
 
       - name: Deploy Application Services (Stage 2)
         uses: azure/arm-deploy@v1
