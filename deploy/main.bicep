@@ -21,9 +21,6 @@ param ragAppPassword string
 @description('A flag to control whether the container apps should be deployed. Used for two-stage deployment.')
 param deployApps bool = true
 
-@description('The unique tag for the Docker images to be deployed.')
-param imageTag string = 'latest' // Default to 'latest' for safety, but script will override.
-
 // Variables for resource naming
 var logAnalyticsWorkspaceName = '${resourcePrefix}-logs'
 var vnetName = '${resourcePrefix}-vnet'
@@ -36,9 +33,9 @@ var storageAccountName = substring(replace(toLower('${resourcePrefix}storage${un
 var fileShareName = 'ragappdata'
 var containerAppsEnvName = '${resourcePrefix}-cae'
 var ollamaAppName = '${resourcePrefix}-ollama-app'
-var ollamaImage = '${acrName}.azurecr.io/rag-app-ollama:${imageTag}'
+var ollamaImage = '${acrName}.azurecr.io/rag-app-ollama:latest'
 var ragAppName = '${resourcePrefix}-rag-app'
-var ragAppImage = '${acrName}.azurecr.io/rag-app:${imageTag}'
+var ragAppImage = '${acrName}.azurecr.io/rag-app:latest'
 // This variable safely resolves the OLLAMA_BASE_URL, avoiding the BCP318 warning.
 
 /*
@@ -56,34 +53,6 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10
       name: 'PerGB2018'
     }
     retentionInDays: 30
-  }
-}
-
-// 2. Virtual Network (VNet)
-// The VNet provides a private network for the Container Apps, enhancing security.
-resource virtualNetwork 'Microsoft.Network/virtualNetworks@2023-05-01' = {
-  name: vnetName
-  location: location
-  properties: {
-    addressSpace: {
-      addressPrefixes: [
-        vnetAddressPrefix
-      ]
-    }
-    subnets: [
-      {
-        name: containerAppsEnvSubnetName
-        properties: {
-          addressPrefix: '10.0.0.0/23'
-        }
-      }
-      {
-        name: otherSubnetName
-        properties: {
-          addressPrefix: '10.0.2.0/24'
-        }
-      }
-    ]
   }
 }
 
@@ -129,11 +98,6 @@ resource containerAppsEnvironment 'Microsoft.App/managedEnvironments@2023-05-01'
   name: containerAppsEnvName
   location: location
   properties: {
-    // This makes the environment internal, meaning apps are only accessible from inside the VNet.
-    vnetConfiguration: {
-      internal: false // This creates an External environment, allowing apps to be exposed to the internet.
-      infrastructureSubnetId: virtualNetwork.properties.subnets[0].id // Reference the 'cae-subnet'
-    }
     // Link to the Log Analytics workspace for logging and monitoring.
     appLogsConfiguration: {
       destination: 'log-analytics'
@@ -257,13 +221,12 @@ resource ollamaApp 'Microsoft.App/containerApps@2023-05-01' = if (deployApps) {
         external: true // Make the app externally accessible.
         targetPort: 11434 // The port the container is listening on.
         transport: 'http' // The protocol for the ingress.
-        // Since this is an external environment, we cannot get a static outbound IP for the rag-app.
-        // We allow all traffic and will rely on the app's own authentication/security.
+        // Allow all traffic. Access can be further restricted if needed,
+        // but for now, any service can reach this public endpoint.
         ipSecurityRestrictions: [
           {
             name: 'Allow all traffic'
             action: 'Allow'
-            ipAddressRange: '0.0.0.0/0'
           }
         ]
       }
