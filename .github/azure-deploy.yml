@@ -5,11 +5,9 @@ on:
     branches:
       - main
 
-env:
-  # IMPORTANT: Replace 'your-prefix-here' with the exact resource prefix
-  # you used when you ran the deploy.ps1 script (e.g., 'ragprod', 'sgrag2025').
-  # This prefix will now be the single source of truth for all resource names in this workflow.
-  RESOURCE_PREFIX: 'ragdimain'
+env:  
+  # The RESOURCE_PREFIX is now read from a repository variable for environment-specific deployments.
+  RESOURCE_PREFIX: ${{ vars.RESOURCE_PREFIX }}
 
 jobs:
   build_and_deploy:
@@ -52,13 +50,16 @@ jobs:
           echo "Cleaning up ollama-app image..."
           docker rmi ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app-ollama:latest
 
-      - name: Update Azure Container App
-        uses: azure/container-apps-deploy-action@v1
+      - name: Deploy Bicep template
+        uses: azure/arm-deploy@v1
         with:
-          azureCredentials: ${{ secrets.AZURE_CREDENTIALS }}
           resourceGroupName: ${{ env.RESOURCE_PREFIX }}-rg
-          # This action can only update one app at a time. We update the rag-app,
-          # as the ollama-app rarely changes. The Bicep deployment ensures both apps
-          # reference the 'latest' tag, so they will pull the new images on their next revision.
-          containerAppName: ${{ env.RESOURCE_PREFIX }}-rag-app
-          imageToUpdate: ${{ env.RESOURCE_PREFIX }}acr.azurecr.io/rag-app:latest
+          template: ./deploy/main.bicep
+          parameters: >
+            resourcePrefix=${{ env.RESOURCE_PREFIX }}
+            ragAppUsername=${{ secrets.RAG_APP_USERNAME }}
+            ragAppPassword=${{ secrets.RAG_APP_PASSWORD }}
+            imageTag=latest
+          failOnStdErr: false
+          scope: resourcegroup
+          deploymentName: gh-workflow-deployment-${{ github.run_id }}

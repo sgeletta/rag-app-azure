@@ -89,7 +89,7 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2023-05-01' = {
 
 // 3. Azure Container Registry (ACR)
 // The ACR will store the Docker images for the ollama-app and rag-app.
-resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' = {
+resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
   name: acrName
   location: location
   sku: {
@@ -102,7 +102,7 @@ resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-01-01-pr
 
 // 4. Azure Storage Account and File Share
 // The storage account provides a file share to persist data across container restarts.
-resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
+resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   name: storageAccountName
   location: location
   sku: {
@@ -112,12 +112,12 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
 }
 
 // We need to get a reference to the 'default' file service that exists within the storage account.
-resource fileService 'Microsoft.Storage/storageAccounts/fileServices@2022-09-01' existing = {
+resource fileService 'Microsoft.Storage/storageAccounts/fileServices@2023-01-01' existing = {
   name: 'default'
   parent: storageAccount
 }
 
-resource fileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2022-09-01' = {
+resource fileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-01-01' = {
   // The parent is the file service, not the storage account itself.
   parent: fileService
   name: fileShareName
@@ -212,6 +212,7 @@ resource ollamaApp 'Microsoft.App/containerApps@2023-05-01' = if (deployApps) {
               }
               initialDelaySeconds: 60
               periodSeconds: 30
+              failureThreshold: 10
             }
             // Readiness probe: After startup, checks if the app is ready to accept traffic.
             // If this fails, the container is temporarily removed from service discovery until it passes again.
@@ -222,6 +223,7 @@ resource ollamaApp 'Microsoft.App/containerApps@2023-05-01' = if (deployApps) {
               }
               initialDelaySeconds: 60
               periodSeconds: 30
+              failureThreshold: 10
             }
           ]
         }
@@ -252,12 +254,18 @@ resource ollamaApp 'Microsoft.App/containerApps@2023-05-01' = if (deployApps) {
       ]
       // Allow the app to be reached from other apps in the environment
       ingress: {
-        external: false // Keep the app internal to the vnet.
-        exposedPort: 80 // CRITICAL FIX: Expose port 80 for internal service discovery.
+        external: true // Make the app externally accessible.
         targetPort: 11434 // The port the container is listening on.
         transport: 'http' // The protocol for the ingress.
-        // Now, requests to http://ollama-app (which defaults to port 80) will be
-        // correctly routed by ACA to port 11434 on this container.
+        // Since this is an external environment, we cannot get a static outbound IP for the rag-app.
+        // We allow all traffic and will rely on the app's own authentication/security.
+        ipSecurityRestrictions: [
+          {
+            name: 'Allow all traffic'
+            action: 'Allow'
+            ipAddressRange: '0.0.0.0/0'
+          }
+        ]
       }
       // Define secrets for the app. This includes the ACR password.
       secrets: [
@@ -286,8 +294,8 @@ module ragAppModule 'ragApp.bicep' = if (deployApps) {
     acrLoginServer: containerRegistry.properties.loginServer
     acrUsername: containerRegistry.name
     acrPassword: containerRegistry.listCredentials().passwords[0].value
-    // CRITICAL FIX: To resolve persistent connection issues, we will use the full internal FQDN.
-    // This makes the connection explicit and removes any ambiguity in DNS resolution.
+    // The ollama-app is now external. We use its public FQDN.
+    // The ChatOllama client will connect to port 80, which ACA will route to the targetPort.
     ollamaBaseUrl: 'http://${ollamaApp.properties.configuration.ingress.fqdn}'
   }
 }
