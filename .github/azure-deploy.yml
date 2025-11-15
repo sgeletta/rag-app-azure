@@ -11,10 +11,25 @@ env:
 
 jobs:
   build_and_deploy:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
+      - name: 🧹 Maximize build space
+        uses: easimon/maximize-build-space@v10
+        with:
+          root-reserve-mb: 512
+          swap-size-mb: 1024
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy Foundational Resources (Stage 1)
         uses: azure/arm-deploy@v1
@@ -26,14 +41,8 @@ jobs:
             ragAppUsername=${{ secrets.RAG_APP_USERNAME }}
             ragAppPassword=${{ secrets.RAG_APP_PASSWORD }}
             deployApps=false
-          failOnStdErr: false
           scope: resourcegroup
           deploymentName: gh-workflow-foundational-${{ github.run_id }}
-
-      - name: Log in to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Log in to Azure Container Registry
         uses: azure/docker-login@v1
@@ -74,6 +83,5 @@ jobs:
             ragAppUsername=${{ secrets.RAG_APP_USERNAME }}
             ragAppPassword=${{ secrets.RAG_APP_PASSWORD }}
             deployApps=true
-          failOnStdErr: false
           scope: resourcegroup
           deploymentName: gh-workflow-deployment-${{ github.run_id }}
